@@ -1,769 +1,502 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cyber Gem Miner & Arcade</title>
-
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        cyberDark: '#0a0b1e',
-                        cyberCard: '#131538',
-                        cyberCyan: '#00f0ff',
-                        cyberPurple: '#a855f7',
-                        cyberGold: '#fbbf24',
-                        cyberPink: '#ec4899',
-                    },
-                    boxShadow: {
-                        cyanGlow: '0 0 20px rgba(0, 240, 255, 0.4)',
-                        purpleGlow: '0 0 20px rgba(168, 85, 247, 0.4)',
-                    }
-                }
-            }
-        }
-    </script>
-
-    <!-- FontAwesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- Telegram WebApp Script -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-    <!-- Adsgram SDK Integration -->
-    <script src="https://sad.adsgram.ai/js/adsgram.js"></script>
-
-    <style>
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            user-select: none;
-            -webkit-user-select: none;
-            touch-action: manipulation;
-            background-color: #0a0b1e;
-        }
-
-        /* Particle animations for clicks */
-        .tap-particle {
-            position: absolute;
-            pointer-events: none;
-            animation: floatUp 0.8s ease-out forwards;
-            font-weight: 800;
-            z-index: 50;
-        }
-
-        @keyframes floatUp {
-            0% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(-80px) scale(1.3);
-            }
-        }
-
-        /* Pulse glow for main gem */
-        .gem-pulse {
-            animation: gemGlow 3s infinite alternate;
-        }
-
-        @keyframes gemGlow {
-            0% { filter: drop-shadow(0 0 15px rgba(0, 240, 255, 0.5)); }
-            100% { filter: drop-shadow(0 0 35px rgba(168, 85, 247, 0.8)); }
-        }
-
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 4px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0a0b1e;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #1e224f;
-            border-radius: 4px;
-        }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#101c25">
+<title>Diamond Miner</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+<style>
+:root{
+  --bg:#101c25; --panel:#18293a; --line:#2b4256; --text:#e8f1f5; --muted:#8ea6b4;
+  --lamp:#f2b45a; --gem:#5fe0e6; --rose:#f08aa8; --ok:#7fd99a;
+  --ra:#9a6b4f; --rb:#6f4a38;
+  --f:"Trebuchet MS",ui-rounded,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:var(--f);overscroll-behavior:none}
+body{padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+#app{max-width:480px;margin:0 auto;height:100%;display:flex;flex-direction:column}
+header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 6px}
+.bal{display:flex;align-items:center;gap:8px;font-size:34px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
+.bal svg{width:30px;height:30px}
+.sub{font-size:13px;color:var(--muted);margin-top:4px;display:flex;gap:10px}
+#boost{color:var(--lamp);font-weight:700}
+.icon-btn{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--muted);font:700 16px var(--f);cursor:pointer}
+main{flex:1;overflow-y:auto;padding:8px 16px 16px}
+section[hidden]{display:none}
+.layer{display:flex;justify-content:space-between;align-items:baseline;font-size:14px;color:var(--muted)}
+.layer b{color:var(--text);font-size:18px}
+.bar{height:8px;border-radius:4px;background:var(--panel);overflow:hidden;margin:6px 0 14px}
+.bar i{display:block;height:100%;width:0;background:var(--gem);transition:width .2s}
+.bar.e i{background:var(--lamp)}
+#stage{position:relative;touch-action:manipulation;user-select:none;-webkit-user-select:none;cursor:pointer;margin:4px 0 8px}
+#stage svg{width:100%;height:auto;display:block;max-height:46vh}
+#rockG{transform-box:fill-box;transform-origin:50% 100%}
+.pop{position:absolute;pointer-events:none;font-weight:700;font-size:22px;color:var(--gem);text-shadow:0 2px 0 rgba(0,0,0,.4);animation:up .8s ease-out forwards}
+@keyframes up{to{transform:translateY(-70px);opacity:0}}
+.meta{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:4px}
+.opt{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.opt p{margin:0 0 8px;font-size:13px;color:var(--muted)}
+.btn{display:block;width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--text);font:600 15px var(--f);text-align:left;cursor:pointer}
+.btn+.btn{margin-top:8px}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.go{background:var(--lamp);border-color:var(--lamp);color:#2a1c05;text-align:center}
+.row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.row .t{flex:1}
+.row .t b{display:block;font-size:16px}
+.row .t span{font-size:13px;color:var(--muted)}
+.row .btn{width:auto;white-space:nowrap;padding:9px 12px;text-align:center}
+h2{font-size:18px;margin:14px 0 4px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:4px 14px;margin-bottom:12px}
+.stat{display:flex;justify-content:space-between;padding:9px 0;font-size:14px;border-bottom:1px solid var(--line)}
+.stat:last-child{border-bottom:0}
+.stat span:first-child{color:var(--muted)}
+nav{display:flex;border-top:1px solid var(--line);background:var(--bg)}
+nav button{flex:1;padding:14px 4px;background:none;border:0;color:var(--muted);font:600 14px var(--f);cursor:pointer;border-top:3px solid transparent}
+nav button[aria-selected="true"]{color:var(--text);border-top-color:var(--lamp)}
+#toast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%);max-width:88%;background:#223a4e;border:1px solid var(--line);padding:10px 14px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:20;text-align:center}
+#toast.on{opacity:1}
+#modal{position:fixed;inset:0;background:rgba(5,10,14,.8);display:none;z-index:30;padding:20px;overflow-y:auto}
+#modal.on{display:block}
+#modal .box{max-width:440px;margin:0 auto;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px}
+#modal h3{margin:14px 0 4px;font-size:15px}
+#modal p{margin:0;font-size:14px;line-height:1.5;color:#c4d4dc}
+button:focus-visible,#stage:focus-visible{outline:2px solid var(--lamp);outline-offset:2px}
+body{background:radial-gradient(ellipse at 50% 34%,rgba(242,180,90,.17),transparent 56%),repeating-linear-gradient(180deg,rgba(255,255,255,.022) 0 2px,transparent 2px 46px),var(--bg)}
+.card,.gem{background:rgba(24,41,58,.72);backdrop-filter:blur(6px)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.gem{border:1px solid var(--line);border-radius:14px;padding:12px;text-align:center}
+.gem.locked{opacity:.55}.gem svg{width:42px;height:42px}.gem b{display:block;margin-top:4px}.gem small{color:var(--muted);font-size:12px}
+.gem .btn{margin-top:8px;text-align:center;padding:8px;font-size:13px}
+.hint{margin:0 0 10px;font-size:13px;color:var(--muted);line-height:1.45}
+.chip{position:absolute;width:7px;height:7px;background:var(--ra);border-radius:2px;pointer-events:none}
+#vein{position:absolute;width:58px;height:58px;border-radius:50%;border:0;background:radial-gradient(circle,#ffe9a8,#f2b45a 60%,#b9791c);box-shadow:0 0 26px 7px rgba(242,180,90,.6);font-size:26px;color:#5a3a06;cursor:pointer;animation:pulse .9s infinite alternate}
+@keyframes pulse{to{transform:scale(1.15)}}
+@media (prefers-reduced-motion:reduce){.pop{animation-duration:.01s}.bar i{transition:none}}
+</style>
 </head>
-<body class="text-white min-h-screen flex flex-col justify-between overflow-x-hidden">
-
-    <!-- TOP BAR: User Info & Balance -->
-    <header class="bg-cyberCard/80 backdrop-blur-md p-4 border-b border-cyan-500/20 sticky top-0 z-40">
-        <div class="max-w-md mx-auto flex justify-between items-center">
-            <!-- User Profile -->
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-cyberCyan to-cyberPurple p-0.5">
-                    <div class="w-full h-full bg-cyberDark rounded-full flex items-center justify-center font-bold text-cyberCyan" id="userAvatar">
-                        U
-                    </div>
-                </div>
-                <div>
-                    <h2 class="text-sm font-bold leading-tight" id="userName">Cyber Miner</h2>
-                    <span class="text-xs text-cyberCyan/80 font-mono" id="userLevel">Lvl 1 Novice</span>
-                </div>
-            </div>
-
-            <!-- Total Gem Balance -->
-            <div class="flex items-center space-x-2 bg-cyberDark/80 px-3 py-1.5 rounded-xl border border-purple-500/30">
-                <i class="fa-solid me-1 fa-gem text-cyberCyan text-lg"></i>
-                <span class="text-lg font-black text-white font-mono tracking-wide" id="gemBalance">0</span>
-            </div>
-        </div>
-    </header>
-
-    <!-- MAIN APP CONTENT (TABS CONTAINER) -->
-    <main class="max-w-md mx-auto w-full flex-1 p-4 pb-24 overflow-y-auto relative">
-
-        <!-- TAB 1: GAME CANVAS / CLICKER -->
-        <section id="tab-game" class="tab-content flex flex-col items-center justify-center space-y-6 my-auto min-h-[70vh]">
-            <!-- Combo & Multiplier Banner -->
-            <div class="w-full flex justify-between items-center px-4 py-2 bg-cyberCard rounded-xl border border-cyan-500/20 shadow-cyanGlow">
-                <div class="flex items-center space-x-2">
-                    <i class="fa-solid fa-bolt text-cyberGold"></i>
-                    <span class="text-xs text-gray-300">Mining Rate:</span>
-                    <span class="text-sm font-bold text-cyberGold font-mono" id="rateDisplay">+1 / Tap</span>
-                </div>
-                <div class="flex items-center space-x-2">
-                    <i class="fa-solid fa-robot text-cyberPurple"></i>
-                    <span class="text-xs text-gray-300">Auto:</span>
-                    <span class="text-sm font-bold text-cyberPurple font-mono" id="autoRateDisplay">0 / sec</span>
-                </div>
-            </div>
-
-            <!-- Main Interactive Cyber Gem Button -->
-            <div class="relative my-6 flex items-center justify-center">
-                <div id="gemContainer" class="w-64 h-64 rounded-full bg-gradient-to-tr from-cyan-900/40 via-purple-900/40 to-pink-900/40 flex items-center justify-center cursor-pointer active:scale-95 transition-transform duration-100 border-2 border-cyberCyan/40 shadow-cyanGlow gem-pulse">
-                    <i class="fa-solid fa-gem text-9xl text-transparent bg-clip-text bg-gradient-to-tr from-cyberCyan via-cyberPurple to-cyberPink pointer-events-none drop-shadow-[0_10px_20px_rgba(0,240,255,0.5)]"></i>
-                </div>
-            </div>
-
-            <!-- Energy Bar Container -->
-            <div class="w-full space-y-2">
-                <div class="flex justify-between text-xs font-semibold px-1">
-                    <span class="text-gray-400 flex items-center gap-1">
-                        <i class="fa-solid fa-battery-three-quarters text-cyberCyan"></i> Energy
-                    </span>
-                    <span class="text-cyberCyan font-mono"><span id="currentEnergy">500</span> / <span id="maxEnergy">500</span></span>
-                </div>
-                <div class="w-full h-3 bg-cyberCard rounded-full overflow-hidden border border-cyan-500/20">
-                    <div id="energyFill" class="h-full bg-gradient-to-r from-cyberCyan to-cyberPurple w-full transition-all duration-200"></div>
-                </div>
-            </div>
-
-            <!-- Quick Action Ad Boost (Rule 5 Compliant Clear Placement) -->
-            <div class="w-full pt-2">
-                <button onclick="openAdModal('energy')" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold py-3 px-4 rounded-xl shadow-purpleGlow flex items-center justify-center space-x-2 transition-all duration-200 active:scale-98">
-                    <i class="fa-solid fa-film text-cyberGold text-lg"></i>
-                    <span>Instant Energy Refill (Watch Ad)</span>
-                </button>
-            </div>
-        </section>
-
-        <!-- TAB 2: TASKS & QUESTS -->
-        <section id="tab-tasks" class="tab-content hidden space-y-4">
-            <div class="bg-cyberCard p-4 rounded-2xl border border-cyan-500/20">
-                <h3 class="text-lg font-bold text-cyberCyan flex items-center gap-2">
-                    <i class="fa-solid fa-list-check"></i> Cyber Quests
-                </h3>
-                <p class="text-xs text-gray-400 mt-1">Complete daily activities to earn additional Cyber Gems.</p>
-            </div>
-
-            <!-- Task Item 1: Daily Check-in -->
-            <div class="bg-cyberCard p-4 rounded-xl border border-white/5 flex justify-between items-center">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyberCyan">
-                        <i class="fa-solid fa-calendar-day text-lg"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-bold">Daily Check-in</h4>
-                        <p class="text-xs text-cyberGold font-mono">+1,000 Gems</p>
-                    </div>
-                </div>
-                <button id="btnDailyCheckin" onclick="claimDailyCheckin()" class="bg-cyberCyan text-cyberDark font-bold text-xs px-4 py-2 rounded-lg hover:opacity-90">
-                    Claim
-                </button>
-            </div>
-
-            <!-- Task Item 2: Telegram Channel -->
-            <div class="bg-cyberCard p-4 rounded-xl border border-white/5 flex justify-between items-center">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400">
-                        <i class="fa-brands fa-telegram text-lg"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-bold">Join Announcement Channel</h4>
-                        <p class="text-xs text-cyberGold font-mono">+2,500 Gems</p>
-                    </div>
-                </div>
-                <button id="btnTgChannel" onclick="completeTgTask()" class="bg-blue-500 text-white font-bold text-xs px-4 py-2 rounded-lg hover:opacity-90">
-                    Join
-                </button>
-            </div>
-
-            <!-- Task Item 3: Watch Rewarded Ad Task -->
-            <div class="bg-cyberCard p-4 rounded-xl border border-purple-500/30 shadow-purpleGlow flex justify-between items-center">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center text-cyberPurple">
-                        <i class="fa-solid fa-video text-lg"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-bold">Watch Ad Quest</h4>
-                        <p class="text-xs text-cyberGold font-mono">+5,000 Gems</p>
-                    </div>
-                </div>
-                <button onclick="openAdModal('gems')" class="bg-gradient-to-r from-cyberPurple to-cyberPink text-white font-bold text-xs px-4 py-2 rounded-lg hover:opacity-90">
-                    Watch Ad
-                </button>
-            </div>
-        </section>
-
-        <!-- TAB 3: UPGRADES & SHOP -->
-        <section id="tab-shop" class="tab-content hidden space-y-4">
-            <div class="bg-cyberCard p-4 rounded-2xl border border-cyan-500/20">
-                <h3 class="text-lg font-bold text-cyberPurple flex items-center gap-2">
-                    <i class="fa-solid fa-rocket"></i> Mining Upgrades
-                </h3>
-                <p class="text-xs text-gray-400 mt-1">Boost your manual tap power and automatic passive miner earnings.</p>
-            </div>
-
-            <!-- Upgrade 1: Multitap -->
-            <div class="bg-cyberCard p-4 rounded-xl border border-white/5 flex justify-between items-center">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyberCyan">
-                        <i class="fa-solid fa-hand-pointer text-lg"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-bold">Multi-Tap Power</h4>
-                        <p class="text-xs text-gray-400">+1 Gem per tap</p>
-                        <p class="text-xs text-cyberGold font-mono mt-0.5" id="costMultiTap">Cost: 100 Gems</p>
-                    </div>
-                </div>
-                <button onclick="buyUpgrade('multiTap')" class="bg-cyberDark border border-cyberCyan text-cyberCyan font-bold text-xs px-4 py-2 rounded-lg hover:bg-cyberCyan hover:text-cyberDark transition-all">
-                    Upgrade
-                </button>
-            </div>
-
-            <!-- Upgrade 2: Auto Miner -->
-            <div class="bg-cyberCard p-4 rounded-xl border border-white/5 flex justify-between items-center">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center text-cyberPurple">
-                        <i class="fa-solid fa-microchip text-lg"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-bold">Cyber Auto-Bot</h4>
-                        <p class="text-xs text-gray-400">+2 Gems / sec (Passive)</p>
-                        <p class="text-xs text-cyberGold font-mono mt-0.5" id="costAutoMiner">Cost: 500 Gems</p>
-                    </div>
-                </div>
-                <button onclick="buyUpgrade('autoMiner')" class="bg-cyberDark border border-cyberPurple text-cyberPurple font-bold text-xs px-4 py-2 rounded-lg hover:bg-cyberPurple hover:text-white transition-all">
-                    Upgrade
-                </button>
-            </div>
-
-            <!-- Upgrade 3: Energy Limit -->
-            <div class="bg-cyberCard p-4 rounded-xl border border-white/5 flex justify-between items-center">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-lg bg-pink-500/10 flex items-center justify-center text-cyberPink">
-                        <i class="fa-solid fa-battery-full text-lg"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-bold">Energy Tank Expand</h4>
-                        <p class="text-xs text-gray-400">+500 Max Energy Capacity</p>
-                        <p class="text-xs text-cyberGold font-mono mt-0.5" id="costEnergyTank">Cost: 300 Gems</p>
-                    </div>
-                </div>
-                <button onclick="buyUpgrade('energyTank')" class="bg-cyberDark border border-cyberPink text-cyberPink font-bold text-xs px-4 py-2 rounded-lg hover:bg-cyberPink hover:text-white transition-all">
-                    Upgrade
-                </button>
-            </div>
-        </section>
-
-        <!-- TAB 4: LEADERBOARD -->
-        <section id="tab-leaderboard" class="tab-content hidden space-y-4">
-            <div class="bg-cyberCard p-4 rounded-2xl border border-cyan-500/20 text-center">
-                <i class="fa-solid fa-trophy text-4xl text-cyberGold mb-2"></i>
-                <h3 class="text-lg font-bold text-white">Global Cyber Miners</h3>
-                <p class="text-xs text-gray-400">Top players with highest accumulated gem balance.</p>
-            </div>
-
-            <div class="bg-cyberCard rounded-xl border border-white/5 overflow-hidden">
-                <div class="divide-y divide-white/5" id="leaderboardList">
-                    <!-- Dynamic mock entries -->
-                    <div class="p-3 flex justify-between items-center text-sm">
-                        <div class="flex items-center space-x-3">
-                            <span class="w-6 font-bold text-cyberGold text-center">1</span>
-                            <span class="font-bold text-gray-200">Alex_Cyber</span>
-                        </div>
-                        <span class="font-mono text-cyberCyan font-bold">1,450,000</span>
-                    </div>
-                    <div class="p-3 flex justify-between items-center text-sm">
-                        <div class="flex items-center space-x-3">
-                            <span class="w-6 font-bold text-gray-300 text-center">2</span>
-                            <span class="font-bold text-gray-200">CryptoMaster</span>
-                        </div>
-                        <span class="font-mono text-cyberCyan font-bold">980,200</span>
-                    </div>
-                    <div class="p-3 flex justify-between items-center text-sm">
-                        <div class="flex items-center space-x-3">
-                            <span class="w-6 font-bold text-amber-600 text-center">3</span>
-                            <span class="font-bold text-gray-200">NeoNode</span>
-                        </div>
-                        <span class="font-mono text-cyberCyan font-bold">750,000</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- TAB 5: SETTINGS & PRIVACY (ADSGRAM RULE 11 COMPLIANT) -->
-        <section id="tab-settings" class="tab-content hidden space-y-4">
-            <div class="bg-cyberCard p-4 rounded-2xl border border-cyan-500/20">
-                <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-gear"></i> Settings & Compliance
-                </h3>
-                <p class="text-xs text-gray-400 mt-1">App details, sound toggles, and official policy compliance.</p>
-            </div>
-
-            <div class="bg-cyberCard p-4 rounded-xl border border-white/5 space-y-3">
-                <div class="flex justify-between items-center">
-                    <span class="text-sm font-semibold">Sound Effects</span>
-                    <button id="toggleSoundBtn" onclick="toggleSound()" class="px-3 py-1 bg-cyberCyan/20 text-cyberCyan rounded-lg text-xs font-bold border border-cyberCyan/30">
-                        ON
-                    </button>
-                </div>
-                <hr class="border-white/10">
-                <div class="flex justify-between items-center">
-                    <span class="text-sm font-semibold">App Version</span>
-                    <span class="text-xs font-mono text-gray-400">v1.2.0 (Production)</span>
-                </div>
-            </div>
-
-            <!-- Important Policy Buttons for Moderation -->
-            <div class="bg-cyberCard p-4 rounded-xl border border-white/5 space-y-2">
-                <h4 class="text-xs font-bold uppercase text-gray-400 tracking-wider">Legal & Transparency</h4>
-                <button onclick="openModal('privacyModal')" class="w-full text-left text-sm py-2 px-3 bg-cyberDark rounded-lg border border-white/10 text-gray-300 flex justify-between items-center hover:text-white">
-                    <span>Privacy Policy</span>
-                    <i class="fa-solid fa-chevron-right text-xs"></i>
-                </button>
-                <button onclick="openModal('termsModal')" class="w-full text-left text-sm py-2 px-3 bg-cyberDark rounded-lg border border-white/10 text-gray-300 flex justify-between items-center hover:text-white">
-                    <span>Terms of Service</span>
-                    <i class="fa-solid fa-chevron-right text-xs"></i>
-                </button>
-            </div>
-        </section>
-    </main>
-
-    <!-- CONFIRMATION MODAL FOR ADSGRAM (Rule 5 Compliance - Prevents Accidental Clicks) -->
-    <div id="adConfirmationModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-cyberCard border border-purple-500/40 rounded-2xl max-w-xs w-full p-6 text-center space-y-4 shadow-purpleGlow">
-            <div class="w-16 h-16 rounded-full bg-purple-500/20 text-cyberPurple mx-auto flex items-center justify-center text-3xl">
-                <i class="fa-solid fa-film"></i>
-            </div>
-            <h3 class="text-lg font-bold text-white">Watch Video Advertisement?</h3>
-            <p class="text-xs text-gray-300" id="adModalDesc">
-                Watch a quick sponsor ad to claim your reward.
-            </p>
-            <div class="flex space-x-3 pt-2">
-                <button onclick="closeModal('adConfirmationModal')" class="w-1/2 py-2.5 bg-gray-700 hover:bg-gray-600 rounded-xl font-bold text-xs text-gray-200">
-                    Cancel
-                </button>
-                <button id="btnConfirmWatchAd" class="w-1/2 py-2.5 bg-gradient-to-r from-cyberPurple to-cyberPink rounded-xl font-bold text-xs text-white shadow-purpleGlow">
-                    Watch Now
-                </button>
-            </div>
-        </div>
+<body>
+<div id="app">
+  <header>
+    <div>
+      <div class="bal">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><polygon points="16,3 27,12 16,29 5,12" fill="#5fe0e6"/><polygon points="16,3 27,12 16,13 5,12" fill="#b4f4f6"/><polygon points="16,13 27,12 16,29" fill="#2fb3bd"/></svg>
+        <span id="bal">0</span>
+      </div>
+      <div class="sub"><span id="rate">+0/s</span><span id="boost"></span></div>
     </div>
+    <button class="icon-btn" id="infoBtn" aria-label="About, privacy and terms">i</button>
+  </header>
 
-    <!-- PRIVACY POLICY MODAL -->
-    <div id="privacyModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-cyberCard border border-cyan-500/40 rounded-2xl max-w-sm w-full p-5 space-y-3 max-h-[80vh] flex flex-col">
-            <h3 class="text-lg font-bold text-cyberCyan">Privacy Policy</h3>
-            <div class="text-xs text-gray-300 overflow-y-auto space-y-2 pr-2 flex-1">
-                <p>We respect your privacy. Cyber Gem Miner operates inside Telegram Mini App infrastructure.</p>
-                <p><strong>Data Collected:</strong> Basic public Telegram ID, Username, and local gameplay state stored safely on device.</p>
-                <p><strong>Monetization & Ads:</strong> We use Adsgram SDK for rewarded advertising. No personally identifiable details are sold or exposed to third-party ad networks.</p>
-            </div>
-            <button onclick="closeModal('privacyModal')" class="w-full py-2 bg-cyberCyan text-cyberDark font-bold text-xs rounded-xl">Close</button>
-        </div>
-    </div>
+  <main>
+    <section id="tab-mine">
+      <div class="layer"><span>Layer: <b id="lname">Clay</b></span><span>Depth <span id="lnum">1</span></span></div>
+      <div class="bar" title="Progress to the next layer"><i id="lbar"></i></div>
 
-    <!-- TERMS OF SERVICE MODAL -->
-    <div id="termsModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-cyberCard border border-cyan-500/40 rounded-2xl max-w-sm w-full p-5 space-y-3 max-h-[80vh] flex flex-col">
-            <h3 class="text-lg font-bold text-cyberCyan">Terms of Service</h3>
-            <div class="text-xs text-gray-300 overflow-y-auto space-y-2 pr-2 flex-1">
-                <p>By launching Cyber Gem Miner, you agree to our fair gaming guidelines.</p>
-                <p>1. Automation scripts, bots, or unauthorized memory tampering are strictly prohibited.</p>
-                <p>2. Virtual gems have no direct real-world currency value unless redeemed via official promotional events.</p>
-            </div>
-            <button onclick="closeModal('termsModal')" class="w-full py-2 bg-cyberCyan text-cyberDark font-bold text-xs rounded-xl">Close</button>
-        </div>
-    </div>
+      <div id="stage" role="button" tabindex="0" aria-label="Tap to mine diamonds">
+        <svg viewBox="0 0 300 250" aria-hidden="true">
+          <defs>
+            <linearGradient id="rg" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" style="stop-color:var(--ra)"/><stop offset="1" style="stop-color:var(--rb)"/>
+            </linearGradient>
+          </defs>
+          <g id="rockG">
+            <path d="M14 238 L46 128 L104 64 L186 50 L250 98 L288 238 Z" fill="url(#rg)"/>
+            <path d="M46 128 L104 64 L130 150 L14 238 Z" fill="#fff" opacity=".06"/>
+            <path d="M186 50 L250 98 L288 238 L200 170 Z" fill="#000" opacity=".16"/>
+            <polyline id="c1" points="104,64 128,110 112,140" fill="none" stroke="#000" stroke-opacity=".55" stroke-width="3" stroke-linecap="round"/>
+            <polyline id="c2" points="186,50 176,98 196,130" fill="none" stroke="#000" stroke-opacity=".55" stroke-width="3" stroke-linecap="round"/>
+            <polyline id="c3" points="60,200 96,176 90,150" fill="none" stroke="#000" stroke-opacity=".55" stroke-width="3" stroke-linecap="round"/>
+            <polygon points="150,96 194,134 150,214 106,134" fill="#5fe0e6"/>
+            <polygon points="150,96 194,134 150,142 106,134" fill="#c4f8fa"/>
+            <polygon points="150,142 194,134 150,214" fill="#2fb3bd"/>
+            <polygon points="150,142 106,134 150,214" fill="#46cdd6"/>
+          </g>
+        </svg>
+        <button id="vein" hidden aria-label="Golden vein: tap for a big bonus">★</button>
+      </div>
 
-    <!-- BOTTOM NAVIGATION BAR -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-cyberCard/90 backdrop-blur-lg border-t border-cyan-500/20 z-40 max-w-md mx-auto">
-        <div class="flex justify-around items-center p-2">
-            <button onclick="switchTab('game')" id="nav-game" class="nav-btn flex flex-col items-center p-2 text-cyberCyan">
-                <i class="fa-solid fa-gamepad text-lg"></i>
-                <span class="text-[10px] font-bold mt-1">Mine</span>
-            </button>
-            <button onclick="switchTab('tasks')" id="nav-tasks" class="nav-btn flex flex-col items-center p-2 text-gray-400 hover:text-white">
-                <i class="fa-solid fa-list-check text-lg"></i>
-                <span class="text-[10px] font-bold mt-1">Quests</span>
-            </button>
-            <button onclick="switchTab('shop')" id="nav-shop" class="nav-btn flex flex-col items-center p-2 text-gray-400 hover:text-white">
-                <i class="fa-solid fa-store text-lg"></i>
-                <span class="text-[10px] font-bold mt-1">Shop</span>
-            </button>
-            <button onclick="switchTab('leaderboard')" id="nav-leaderboard" class="nav-btn flex flex-col items-center p-2 text-gray-400 hover:text-white">
-                <i class="fa-solid fa-trophy text-lg"></i>
-                <span class="text-[10px] font-bold mt-1">Ranks</span>
-            </button>
-            <button onclick="switchTab('settings')" id="nav-settings" class="nav-btn flex flex-col items-center p-2 text-gray-400 hover:text-white">
-                <i class="fa-solid fa-gear text-lg"></i>
-                <span class="text-[10px] font-bold mt-1">Settings</span>
-            </button>
-        </div>
-    </nav>
+      <div class="meta"><span>Energy</span><span id="etxt">100 / 100</span></div>
+      <div class="bar e"><i id="ebar"></i></div>
 
-    <!-- JAVASCRIPT GAME ENGINE LOGIC -->
-    <script>
-        // --- GAME STATE ---
-        let gameState = {
-            gems: 0,
-            energy: 500,
-            maxEnergy: 500,
-            tapPower: 1,
-            autoMinerRate: 0,
-            multiTapCost: 100,
-            autoMinerCost: 500,
-            energyTankCost: 300,
-            dailyClaimed: false,
-            tgTaskCompleted: false,
-            soundEnabled: true,
-            lastSaveTime: Date.now()
-        };
+      <div class="opt">
+        <p>Optional bonuses. The game works fully without ads.</p>
+        <button class="btn" id="adBoost">Watch an ad: 2× diamonds for 2 minutes</button>
+        <button class="btn" id="adEnergy">Watch an ad: refill energy</button>
+      </div>
+    </section>
 
-        let currentAdRewardType = null;
-        let adsgramController = null;
+    <section id="tab-up" hidden>
+      <h2>Upgrades</h2>
+      <div class="card" id="uplist"></div>
+    </section>
 
-        // --- SOUND EFFECTS (Web Audio API - Self Contained) ---
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playClickSound() {
-            if (!gameState.soundEnabled || audioCtx.state === 'suspended') return;
-            try {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(600, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.05);
-                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.05);
-            } catch (e) {
-                console.log("Audio play error", e);
-            }
-        }
+    <section id="tab-vault" hidden>
+      <h2>Gem collection</h2>
+      <p class="hint">Gems drop at random while you mine. Each new type you discover adds +1 diamond per tap for good, even if you sell it. A golden ★ vein sometimes appears on the rock: tap it fast for a big bonus.</p>
+      <div class="grid" id="gems"></div>
+      <h2>Goals</h2>
+      <div class="card" id="achs"></div>
+    </section>
 
-        // --- INITIALIZATION ---
-        window.addEventListener('load', () => {
-            // Initialize Telegram WebApp SDK
-            if (window.Telegram && window.Telegram.WebApp) {
-                window.Telegram.WebApp.ready();
-                window.Telegram.WebApp.expand();
+    <section id="tab-day" hidden>
+      <h2>Daily reward</h2>
+      <div class="card"><div class="row"><div class="t"><b id="streak">Day 1</b><span id="streaksub">Come back every day to grow your streak.</span></div><button class="btn go" id="claimDaily">Claim</button></div></div>
+      <h2>Today’s tasks</h2>
+      <div class="card" id="tasklist"></div>
+      <h2>Your stats</h2>
+      <div class="card" id="stats"></div>
+    </section>
+  </main>
 
-                const tgUser = window.Telegram.WebApp.initDataUnsafe?.user;
-                if (tgUser) {
-                    document.getElementById('userName').innerText = tgUser.first_name || 'Cyber Miner';
-                    document.getElementById('userAvatar').innerText = (tgUser.first_name || 'C').charAt(0).toUpperCase();
-                }
-            }
+  <nav role="tablist">
+    <button role="tab" data-tab="mine" aria-selected="true">Mine</button>
+    <button role="tab" data-tab="up" aria-selected="false">Upgrades</button>
+    <button role="tab" data-tab="vault" aria-selected="false">Vault</button>
+    <button role="tab" data-tab="day" aria-selected="false">Daily</button>
+  </nav>
+</div>
 
-            // Load saved data
-            loadSavedState();
+<div id="toast" role="status"></div>
 
-            // Setup Adsgram SDK Controller
-            // Note: Replace "YOUR-ADSGRAM-BLOCK-ID" with actual Adsgram Block ID from Adsgram dashboard
-            if (window.Adsgram) {
-                try {
-                    adsgramController = window.Adsgram.init({ blockId: "57487" });
-                } catch(e) {
-                    console.log("Adsgram Init Exception:", e);
-                }
-            }
+<div id="modal" role="dialog" aria-modal="true" aria-label="About Diamond Miner">
+  <div class="box">
+    <b style="font-size:18px">Diamond Miner</b>
+    <h3>About the game</h3>
+    <p>Tap the rock to mine diamonds, buy upgrades and dig through deeper layers. Diamonds are in-game points only. They have no cash value and cannot be withdrawn or exchanged.</p>
+    <h3>Ads</h3>
+    <p>Ads are optional. They only appear when you press a button that says “Watch an ad”, and you get the bonus after the ad finishes. You never need to watch an ad to play. Ads are provided by AdsGram.</p>
+    <h3>Privacy</h3>
+    <p>Your progress is saved on your device. The game uses your Telegram user ID only to keep your save separate from other players. We do not sell personal data. AdsGram may process data under its own privacy policy.</p>
+    <h3>Terms</h3>
+    <p>This game is provided as is, for entertainment. Any attempt to cheat or automate play may be blocked.</p>
+    <h3>Contact</h3>
+    <p>@gemminer22_bot</p>
+    <button class="btn go" id="closeInfo" style="margin-top:16px">Close</button>
+  </div>
+</div>
 
-            // Setup Tap Event
-            const gemContainer = document.getElementById('gemContainer');
-            gemContainer.addEventListener('pointerdown', handleGemTap);
+<script>
+(function(){
+"use strict";
+/* ====== SETTINGS ====== */
+var ADSGRAM_BLOCK_ID = "YOUR_ADSGRAM_BLOCK_ID"; /* paste your reward block ID from the AdsGram dashboard */
+var AD_COOLDOWN_MS = 45000;
+var OFFLINE_CAP_S = 7200;
 
-            // Start Loops
-            setInterval(gameLoop, 1000); // 1-second interval for energy refill & passive income
-            setInterval(saveState, 5000); // Auto-save state every 5 seconds
-            
-            updateUI();
-        });
+var TG = window.Telegram && window.Telegram.WebApp;
+if (TG) {
+  try { TG.ready(); TG.expand(); } catch(e){}
+  try { TG.disableVerticalSwipes && TG.disableVerticalSwipes(); } catch(e){}
+  try { TG.setHeaderColor && TG.setHeaderColor("#101c25"); TG.setBackgroundColor && TG.setBackgroundColor("#101c25"); } catch(e){}
+}
+var uid = (TG && TG.initDataUnsafe && TG.initDataUnsafe.user && TG.initDataUnsafe.user.id) || "local";
+var KEY = "diamondminer_v1_" + uid;
 
-        // --- GAME CORE ENGINE ---
-        function handleGemTap(e) {
-            // Check Audio Context resume on first gesture
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
+function $(id){ return document.getElementById(id); }
+function today(){ return new Date().toISOString().slice(0,10); }
+function yesterday(){ return new Date(Date.now()-864e5).toISOString().slice(0,10); }
+function fmt(n){
+  n = Math.floor(n);
+  if (n >= 1e9) return (n/1e9).toFixed(2) + "B";
+  if (n >= 1e6) return (n/1e6).toFixed(2) + "M";
+  if (n >= 1e4) return (n/1e3).toFixed(1) + "K";
+  return String(n);
+}
 
-            if (gameState.energy < gameState.tapPower) {
-                // Show floating low-energy tip
-                createParticle(e.clientX, e.clientY, "Low Energy!", "text-red-400");
-                return;
-            }
+/* ====== STATE ====== */
+function fresh(){
+  return {gems:0,total:0,taps:0,lv:{pick:0,drill:0,lamp:0,charge:0},energy:100,last:Date.now(),
+    boostUntil:0,streak:0,lastClaim:"",day:"",tasks:{tap:0,buy:0,earn:0,done:{}},ads:0,adAt:0,vault:{},found:{},ach:{},veins:0};
+}
+var s = fresh();
+try {
+  var raw = localStorage.getItem(KEY);
+  if (raw) { var p = JSON.parse(raw); s = Object.assign(fresh(), p); s.lv = Object.assign(fresh().lv, p.lv||{}); }
+} catch(e){}
+function save(){ try { s.last = Date.now(); localStorage.setItem(KEY, JSON.stringify(s)); } catch(e){} }
 
-            // Deduct Energy & Add Gems
-            gameState.energy -= gameState.tapPower;
-            gameState.gems += gameState.tapPower;
+function rollDay(){
+  if (s.day !== today()) { s.day = today(); s.tasks = {tap:0,buy:0,earn:0,done:{}}; }
+}
+rollDay();
 
-            playClickSound();
-            createParticle(e.clientX, e.clientY, `+${gameState.tapPower}`, "text-cyberCyan");
-            updateUI();
-        }
+/* ====== GAME RULES ====== */
+var UP = [
+  {id:"pick",  name:"Sharper pickaxe",  desc:"+1 diamond per tap",       base:50,  g:1.7},
+  {id:"drill", name:"Drill rig",        desc:"+1 diamond per second",    base:100, g:1.7},
+  {id:"lamp",  name:"Bigger battery",   desc:"+50 maximum energy",       base:80,  g:1.6},
+  {id:"charge",name:"Fast charger",     desc:"+1 energy regained per second", base:150, g:1.8}
+];
+var LAYERS = [
+  {n:"Clay",a:"#a8745a",b:"#744c3a"},{n:"Limestone",a:"#bdb6a2",b:"#868071"},
+  {n:"Slate",a:"#7f93a3",b:"#4f6171"},{n:"Granite",a:"#b08f93",b:"#74575c"},
+  {n:"Basalt",a:"#6b6f82",b:"#3f4254"},{n:"Quartz vein",a:"#c9b6d8",b:"#8a769c"},
+  {n:"Obsidian",a:"#4a4660",b:"#22202f"},{n:"Deep core",a:"#d4663f",b:"#7d2a17"}
+];
+function cost(u){ return Math.floor(u.base * Math.pow(u.g, s.lv[u.id])); }
+function kinds(){ return Object.keys(s.found).length; }
+function power(){ return 1 + s.lv.pick + kinds(); }
+function auto(){ return s.lv.drill; }
+function maxE(){ return 100 + 50*s.lv.lamp; }
+function regen(){ return 1 + s.lv.charge; }
+function mult(){ return Date.now() < s.boostUntil ? 2 : 1; }
+function level(){ return Math.floor((1 + Math.sqrt(1 + 4*s.total/100))/2); }
+function addGems(n){ s.gems += n; s.total += n; s.tasks.earn += n; }
 
-        function createParticle(x, y, text, colorClass) {
-            const particle = document.createElement('div');
-            particle.className = `tap-particle ${colorClass} text-xl font-mono`;
-            particle.innerText = text;
+/* offline progress (half rate, capped) */
+(function(){
+  var secs = Math.min(OFFLINE_CAP_S, Math.max(0, (Date.now() - s.last)/1000));
+  if (secs > 20) {
+    s.energy = maxE();
+    var gain = Math.floor(secs * auto() * 0.5);
+    if (gain > 0) { addGems(gain); setTimeout(function(){ toast("Welcome back. Your drills mined " + fmt(gain) + " while you were away."); }, 400); }
+  }
+  if (s.energy > maxE()) s.energy = maxE();
+})();
 
-            // Positioning offset
-            particle.style.left = `${x - 20}px`;
-            particle.style.top = `${y - 30}px`;
+/* ====== RENDER ====== */
+var lastLayer = -1;
+function render(){
+  $("bal").textContent = fmt(s.gems);
+  var a = auto() * mult();
+  $("rate").textContent = "+" + fmt(a) + "/s";
+  var left = Math.max(0, Math.ceil((s.boostUntil - Date.now())/1000));
+  $("boost").textContent = left ? "2× for " + Math.floor(left/60) + ":" + String(left%60).padStart(2,"0") : "";
+  var lv = level(), idx = Math.min(lv-1, LAYERS.length-1);
+  if (idx !== lastLayer) {
+    lastLayer = idx;
+    document.documentElement.style.setProperty("--ra", LAYERS[idx].a);
+    document.documentElement.style.setProperty("--rb", LAYERS[idx].b);
+    $("lname").textContent = LAYERS[idx].n;
+  }
+  $("lnum").textContent = lv;
+  var start = 100*lv*(lv-1), next = 100*(lv+1)*lv, f = (s.total-start)/(next-start);
+  $("lbar").style.width = Math.min(100, f*100) + "%";
+  $("c1").style.opacity = f > .25 ? 1 : 0;
+  $("c2").style.opacity = f > .5 ? 1 : 0;
+  $("c3").style.opacity = f > .75 ? 1 : 0;
+  $("ebar").style.width = (s.energy/maxE()*100) + "%";
+  $("etxt").textContent = Math.floor(s.energy) + " / " + maxE();
+  var cd = Date.now() - s.adAt < AD_COOLDOWN_MS;
+  $("adBoost").disabled = cd; $("adEnergy").disabled = cd;
+}
 
-            document.body.appendChild(particle);
+function renderUp(){
+  var h = "";
+  UP.forEach(function(u){
+    var c = cost(u), can = s.gems >= c;
+    h += '<div class="row"><div class="t"><b>' + u.name + ' (level ' + s.lv[u.id] + ')</b><span>' + u.desc + '</span></div>' +
+         '<button class="btn" data-up="' + u.id + '"' + (can ? "" : " disabled") + '>' + fmt(c) + '</button></div>';
+  });
+  $("uplist").innerHTML = h;
+}
 
-            setTimeout(() => {
-                particle.remove();
-            }, 800);
-        }
+var TASKS = [
+  {id:"tap", t:"Tap 150 times", goal:150, reward:150, get:function(){return s.tasks.tap;}},
+  {id:"buy", t:"Buy 1 upgrade", goal:1, reward:200, get:function(){return s.tasks.buy;}},
+  {id:"earn",t:"Mine 1,000 diamonds", goal:1000, reward:300, get:function(){return s.tasks.earn;}}
+];
+function renderDay(){
+  rollDay();
+  var nextStreak = s.lastClaim === yesterday() ? s.streak + 1 : (s.lastClaim === today() ? s.streak : 1);
+  var claimed = s.lastClaim === today();
+  $("streak").textContent = "Day " + (claimed ? s.streak : nextStreak) + " streak";
+  $("streaksub").textContent = claimed ? "Claimed today. Come back tomorrow." : "Reward: " + fmt(100*Math.min(nextStreak,7)) + " diamonds";
+  $("claimDaily").disabled = claimed;
+  var h = "";
+  TASKS.forEach(function(k){
+    var v = Math.min(k.goal, k.get()), done = s.tasks.done[k.id], ready = v >= k.goal && !done;
+    h += '<div class="row"><div class="t"><b>' + k.t + '</b><span>' + fmt(v) + ' / ' + fmt(k.goal) + ' · reward ' + k.reward + '</span></div>' +
+         '<button class="btn' + (ready ? " go" : "") + '" data-task="' + k.id + '"' + (ready ? "" : " disabled") + '>' + (done ? "Done" : "Claim") + '</button></div>';
+  });
+  $("tasklist").innerHTML = h;
+  $("stats").innerHTML =
+    '<div class="stat"><span>Total mined</span><span>' + fmt(s.total) + '</span></div>' +
+    '<div class="stat"><span>Taps</span><span>' + fmt(s.taps) + '</span></div>' +
+    '<div class="stat"><span>Depth</span><span>' + level() + '</span></div>' +
+    '<div class="stat"><span>Diamonds per tap</span><span>' + power() + '</span></div>' +
+    '<div class="stat"><span>Diamonds per second</span><span>' + auto() + '</span></div>';
+}
 
-        function gameLoop() {
-            // 1. Passive Energy Refill (3 energy per second)
-            if (gameState.energy < gameState.maxEnergy) {
-                gameState.energy = Math.min(gameState.maxEnergy, gameState.energy + 3);
-            }
+var tab = "mine";
+function refreshTab(){ if (tab === "up") renderUp(); else if (tab === "vault") renderVault(); else if (tab === "day") renderDay(); }
 
-            // 2. Auto Miner Passive Income
-            if (gameState.autoMinerRate > 0) {
-                gameState.gems += gameState.autoMinerRate;
-            }
+/* ====== TOAST ====== */
+var tt;
+function toast(m){ var t = $("toast"); t.textContent = m; t.classList.add("on"); clearTimeout(tt); tt = setTimeout(function(){ t.classList.remove("on"); }, 2600); }
 
-            updateUI();
-        }
+/* ====== TAPPING ====== */
+var stage = $("stage"), rockG = $("rockG");
+function haptic(kind){ try { TG && TG.HapticFeedback && TG.HapticFeedback.impactOccurred(kind); } catch(e){} }
+function tap(x, y){
+  if (s.energy < 1) { toast("Out of energy. It recharges every second."); return; }
+  s.energy -= 1; s.taps += 1; s.tasks.tap += 1;
+  var g = power() * mult();
+  addGems(g);
+  haptic("light");
+  chips(x, y);
+  dropGem();
+  try { rockG.animate([{transform:"scale(.96)"},{transform:"scale(1)"}], {duration:110}); } catch(e){}
+  var r = stage.getBoundingClientRect(), p = document.createElement("span");
+  p.className = "pop"; p.textContent = "+" + g;
+  p.style.left = (x - r.left - 12) + "px"; p.style.top = (y - r.top - 20) + "px";
+  stage.appendChild(p); setTimeout(function(){ p.remove(); }, 800);
+  render();
+}
+stage.addEventListener("pointerdown", function(e){ e.preventDefault(); tap(e.clientX, e.clientY); });
+stage.addEventListener("keydown", function(e){
+  if (e.key === "Enter" || e.key === " ") { e.preventDefault(); var r = stage.getBoundingClientRect(); tap(r.left + r.width/2, r.top + r.height/2); }
+});
 
-        // --- UI UPDATER ---
-        function updateUI() {
-            document.getElementById('gemBalance').innerText = gameState.gems.toLocaleString();
-            document.getElementById('currentEnergy').innerText = gameState.energy;
-            document.getElementById('maxEnergy').innerText = gameState.maxEnergy;
+/* ====== UPGRADES / DAILY ====== */
+$("uplist").addEventListener("click", function(e){
+  var b = e.target.closest("[data-up]"); if (!b) return;
+  var u = UP.filter(function(x){ return x.id === b.getAttribute("data-up"); })[0], c = cost(u);
+  if (s.gems < c) return;
+  s.gems -= c; s.lv[u.id] += 1; s.tasks.buy += 1;
+  if (u.id === "lamp") s.energy = Math.min(maxE(), s.energy + 50);
+  haptic("medium"); save(); render(); renderUp();
+});
+$("claimDaily").addEventListener("click", function(){
+  if (s.lastClaim === today()) return;
+  s.streak = s.lastClaim === yesterday() ? s.streak + 1 : 1;
+  s.lastClaim = today();
+  var r = 100 * Math.min(s.streak, 7); addGems(r);
+  toast("Daily reward: +" + r + " diamonds"); save(); render(); renderDay();
+});
+$("tasklist").addEventListener("click", function(e){
+  var b = e.target.closest("[data-task]"); if (!b) return;
+  var k = TASKS.filter(function(x){ return x.id === b.getAttribute("data-task"); })[0];
+  if (s.tasks.done[k.id] || k.get() < k.goal) return;
+  s.tasks.done[k.id] = true; addGems(k.reward);
+  toast("Task done: +" + k.reward + " diamonds"); save(); render(); renderDay();
+});
 
-            // Energy Bar Percentage
-            const pct = (gameState.energy / gameState.maxEnergy) * 100;
-            document.getElementById('energyFill').style.width = `${pct}%`;
+/* ====== OPTIONAL REWARDED ADS (AdsGram) ====== */
+var adController = null;
+try {
+  if (window.Adsgram && ADSGRAM_BLOCK_ID && ADSGRAM_BLOCK_ID.indexOf("YOUR_") !== 0) {
+    adController = window.Adsgram.init({ blockId: ADSGRAM_BLOCK_ID });
+  }
+} catch(e){}
+function showAd(onReward){
+  if (Date.now() - s.adAt < AD_COOLDOWN_MS) return;
+  if (!adController) { toast("Ads are not available right now."); return; }
+  adController.show().then(function(res){
+    if (res && res.done) { s.adAt = Date.now(); s.ads += 1; onReward(); save(); render(); }
+    else toast("Watch the full ad to get the bonus.");
+  }).catch(function(){ toast("No ad available right now. Try again soon."); });
+}
+$("adBoost").addEventListener("click", function(){
+  showAd(function(){ s.boostUntil = Math.max(Date.now(), s.boostUntil) + 120000; toast("2× diamonds for 2 minutes"); });
+});
+$("adEnergy").addEventListener("click", function(){
+  showAd(function(){ s.energy = maxE(); toast("Energy refilled"); });
+});
 
-            // Display Rates
-            document.getElementById('rateDisplay').innerText = `+${gameState.tapPower} / Tap`;
-            document.getElementById('autoRateDisplay').innerText = `+${gameState.autoMinerRate} / sec`;
+/* ====== NAV / MODAL ====== */
+document.querySelector("nav").addEventListener("click", function(e){
+  var b = e.target.closest("[data-tab]"); if (!b) return;
+  tab = b.getAttribute("data-tab");
+  ["mine","up","vault","day"].forEach(function(n){ $("tab-" + n).hidden = n !== tab; });
+  document.querySelectorAll("nav button").forEach(function(x){ x.setAttribute("aria-selected", x === b ? "true" : "false"); });
+  refreshTab();
+});
+$("infoBtn").addEventListener("click", function(){ $("modal").classList.add("on"); });
+$("closeInfo").addEventListener("click", function(){ $("modal").classList.remove("on"); });
 
-            // Upgrade Costs
-            document.getElementById('costMultiTap').innerText = `Cost: ${gameState.multiTapCost.toLocaleString()} Gems`;
-            document.getElementById('costAutoMiner').innerText = `Cost: ${gameState.autoMinerCost.toLocaleString()} Gems`;
-            document.getElementById('costEnergyTank').innerText = `Cost: ${gameState.energyTankCost.toLocaleString()} Gems`;
+/* ====== GEMS, GOLD VEINS, GOALS ====== */
+var GEMS = [
+  {id:"amethyst",n:"Amethyst",c:"#b58cf0",w:50,v:40},
+  {id:"topaz",n:"Topaz",c:"#f2b45a",w:30,v:90},
+  {id:"emerald",n:"Emerald",c:"#5fd68f",w:14,v:220},
+  {id:"ruby",n:"Ruby",c:"#ef5b78",w:5,v:650},
+  {id:"sapphire",n:"Sapphire",c:"#5b8cf0",w:1,v:1600}
+];
+function dropGem(){
+  if (Math.random() > 0.035) return;
+  var r = Math.random()*100, acc = 0, g = GEMS[0];
+  for (var i = 0; i < GEMS.length; i++) { acc += GEMS[i].w; if (r < acc) { g = GEMS[i]; break; } }
+  var first = !s.found[g.id];
+  s.found[g.id] = true; s.vault[g.id] = (s.vault[g.id] || 0) + 1;
+  haptic("medium");
+  toast(first ? "New gem: " + g.n + ". +1 diamond per tap for good." : "You found a " + g.n + ".");
+  if (tab === "vault") renderVault();
+}
+function chip(x, y){
+  var r = stage.getBoundingClientRect(), c = document.createElement("i");
+  c.className = "chip"; c.style.left = (x - r.left) + "px"; c.style.top = (y - r.top) + "px";
+  stage.appendChild(c);
+  try { c.animate([{transform:"translate(0,0)",opacity:1},{transform:"translate(" + ((Math.random()-.5)*90) + "px," + (20+Math.random()*50) + "px)",opacity:0}],{duration:520,easing:"ease-in"}); } catch(e){}
+  setTimeout(function(){ c.remove(); }, 560);
+}
+function chips(x, y){ for (var i = 0; i < 4; i++) chip(x, y); }
 
-            // Calculate Level
-            const level = Math.floor(gameState.gems / 5000) + 1;
-            document.getElementById('userLevel').innerText = `Lvl ${level} Miner`;
-        }
+var vein = $("vein"), hideT;
+function scheduleVein(){ setTimeout(showVein, 25000 + Math.random()*30000); }
+function showVein(){
+  vein.style.left = (15 + Math.random()*60) + "%"; vein.style.top = (25 + Math.random()*40) + "%";
+  vein.hidden = false;
+  hideT = setTimeout(function(){ vein.hidden = true; scheduleVein(); }, 7000);
+}
+vein.addEventListener("pointerdown", function(e){
+  e.stopPropagation(); e.preventDefault();
+  clearTimeout(hideT); vein.hidden = true; scheduleVein();
+  var g = power() * mult() * 40; addGems(g); s.veins += 1;
+  haptic("heavy"); toast("Gold vein. +" + fmt(g) + " diamonds"); save(); render();
+});
 
-        // --- SHOP & UPGRADES ---
-        function buyUpgrade(type) {
-            if (type === 'multiTap') {
-                if (gameState.gems >= gameState.multiTapCost) {
-                    gameState.gems -= gameState.multiTapCost;
-                    gameState.tapPower += 1;
-                    gameState.multiTapCost = Math.floor(gameState.multiTapCost * 2.2);
-                } else {
-                    alertModal("Not enough gems to buy Multi-Tap Upgrade!");
-                }
-            } else if (type === 'autoMiner') {
-                if (gameState.gems >= gameState.autoMinerCost) {
-                    gameState.gems -= gameState.autoMinerCost;
-                    gameState.autoMinerRate += 2;
-                    gameState.autoMinerCost = Math.floor(gameState.autoMinerCost * 2.5);
-                } else {
-                    alertModal("Not enough gems to buy Cyber Auto-Bot!");
-                }
-            } else if (type === 'energyTank') {
-                if (gameState.gems >= gameState.energyTankCost) {
-                    gameState.gems -= gameState.energyTankCost;
-                    gameState.maxEnergy += 500;
-                    gameState.energy += 500;
-                    gameState.energyTankCost = Math.floor(gameState.energyTankCost * 2.0);
-                } else {
-                    alertModal("Not enough gems to expand Energy Tank!");
-                }
-            }
-            updateUI();
-            saveState();
-        }
+var GOALS = [
+  {t:"Mine 100 diamonds", ok:function(){ return s.total >= 100; }},
+  {t:"Tap 1,000 times", ok:function(){ return s.taps >= 1000; }},
+  {t:"Reach depth 5", ok:function(){ return level() >= 5; }},
+  {t:"Find all 5 gems", ok:function(){ return kinds() >= 5; }},
+  {t:"Tap 5 gold veins", ok:function(){ return s.veins >= 5; }},
+  {t:"Reach 20 upgrade levels", ok:function(){ var n = 0; for (var k in s.lv) n += s.lv[k]; return n >= 20; }}
+];
+function checkAch(){
+  GOALS.forEach(function(k, i){
+    if (!s.ach[i] && k.ok()) { s.ach[i] = true; addGems(250); toast("Goal complete: " + k.t + ". +250 diamonds"); if (tab === "vault") renderVault(); }
+  });
+}
+function renderVault(){
+  var h = "";
+  GEMS.forEach(function(g){
+    var f = s.found[g.id], n = s.vault[g.id] || 0;
+    h += '<div class="gem' + (f ? "" : " locked") + '"><svg viewBox="0 0 32 32" aria-hidden="true"><polygon points="16,3 27,12 16,29 5,12" fill="' + (f ? g.c : "#2b4256") + '"/><polygon points="16,3 27,12 16,13 5,12" fill="#fff" opacity=".35"/></svg><b>' + (f ? g.n : "Unknown gem") + '</b><small>' + (f ? "Owned " + n + " · worth " + g.v + " each" : "Keep mining to find it") + '</small>' +
+      (f ? '<button class="btn" data-sell="' + g.id + '"' + (n ? "" : " disabled") + '>Sell for ' + fmt(n*g.v) + '</button>' : "") + '</div>';
+  });
+  $("gems").innerHTML = h;
+  var a = "";
+  GOALS.forEach(function(k, i){ a += '<div class="stat"><span>' + k.t + '</span><span>' + (s.ach[i] ? "Done" : "250 reward") + '</span></div>'; });
+  $("achs").innerHTML = a;
+}
+$("gems").addEventListener("click", function(e){
+  var b = e.target.closest("[data-sell]"); if (!b) return;
+  var g = GEMS.filter(function(x){ return x.id === b.getAttribute("data-sell"); })[0], n = s.vault[g.id] || 0;
+  if (!n) return;
+  s.vault[g.id] = 0; addGems(n*g.v); toast("Sold " + n + " " + g.n + " for " + fmt(n*g.v)); save(); render(); renderVault();
+});
 
-        // --- TASKS SYSTEM ---
-        function claimDailyCheckin() {
-            if (gameState.dailyClaimed) {
-                alertModal("You have already claimed today's check-in reward.");
-                return;
-            }
-            gameState.gems += 1000;
-            gameState.dailyClaimed = true;
-            document.getElementById('btnDailyCheckin').innerText = "Claimed";
-            document.getElementById('btnDailyCheckin').className = "bg-gray-700 text-gray-400 font-bold text-xs px-4 py-2 rounded-lg cursor-not-allowed";
-            alertModal("Success! You received +1,000 Gems.");
-            updateUI();
-            saveState();
-        }
+/* ====== LOOP ====== */
+setInterval(function(){
+  s.energy = Math.min(maxE(), s.energy + regen());
+  var a = auto() * mult(); if (a > 0) addGems(a);
+  render();
+  if (tab === "up") renderUp();
+  checkAch();
+}, 1000);
+setInterval(save, 4000);
+document.addEventListener("visibilitychange", function(){ if (document.hidden) save(); });
+window.addEventListener("pagehide", save);
 
-        function completeTgTask() {
-            if (gameState.tgTaskCompleted) {
-                alertModal("Task already completed.");
-                return;
-            }
-            // Open Channel link safely
-            if (window.Telegram && window.Telegram.WebApp) {
-                window.Telegram.WebApp.openTelegramLink("https://t.me/telegram");
-            } else {
-                window.open("https://t.me/telegram", "_blank");
-            }
-
-            setTimeout(() => {
-                gameState.gems += 2500;
-                gameState.tgTaskCompleted = true;
-                document.getElementById('btnTgChannel').innerText = "Completed";
-                document.getElementById('btnTgChannel').className = "bg-gray-700 text-gray-400 font-bold text-xs px-4 py-2 rounded-lg cursor-not-allowed";
-                alertModal("Task verified! You earned +2,500 Gems.");
-                updateUI();
-                saveState();
-            }, 3000);
-        }
-
-        // --- ADSGRAM REWARDED ADS LOGIC (Rule 5 Compliant) ---
-        function openAdModal(rewardType) {
-            currentAdRewardType = rewardType;
-            const desc = document.getElementById('adModalDesc');
-            if (rewardType === 'energy') {
-                desc.innerText = "Watch a sponsor video to instantly refill 100% of your energy tank.";
-            } else {
-                desc.innerText = "Watch a sponsor video to receive +5,000 Instant Gems.";
-            }
-
-            document.getElementById('btnConfirmWatchAd').onclick = executeAdsgramShow;
-            openModal('adConfirmationModal');
-        }
-
-        function executeAdsgramShow() {
-            closeModal('adConfirmationModal');
-
-            if (adsgramController) {
-                adsgramController.show().then((result) => {
-                    // Reward Callback
-                    onAdWatchedSuccess();
-                }).catch((result) => {
-                    // Error / Dismissed Callback
-                    console.log("Ad Error or Dismissed:", result);
-                    alertModal("Ad was not completed. Reward not granted.");
-                });
-            } else {
-                // Fallback simulation for local development / review testing
-                console.log("Adsgram SDK simulator mode active.");
-                setTimeout(() => {
-                    onAdWatchedSuccess();
-                }, 1000);
-            }
-        }
-
-        function onAdWatchedSuccess() {
-            if (currentAdRewardType === 'energy') {
-                gameState.energy = gameState.maxEnergy;
-                alertModal("Ad Completed! Your Energy has been fully refilled.");
-            } else {
-                gameState.gems += 5000;
-                alertModal("Ad Completed! You received +5,000 Cyber Gems.");
-            }
-            updateUI();
-            saveState();
-        }
-
-        // --- NAVIGATION TABS ---
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.nav-btn').forEach(el => {
-                el.classList.remove('text-cyberCyan');
-                el.classList.add('text-gray-400');
-            });
-
-            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
-            document.getElementById(`nav-${tabId}`).classList.add('text-cyberCyan');
-            document.getElementById(`nav-${tabId}`).classList.remove('text-gray-400');
-        }
-
-        // --- MODAL UTILITIES ---
-        function openModal(id) {
-            document.getElementById(id).classList.remove('hidden');
-        }
-        function closeModal(id) {
-            document.getElementById(id).classList.add('hidden');
-        }
-
-        function alertModal(msg) {
-            if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.showAlert) {
-                window.Telegram.WebApp.showAlert(msg);
-            } else {
-                alert(msg);
-            }
-        }
-
-        function toggleSound() {
-            gameState.soundEnabled = !gameState.soundEnabled;
-            document.getElementById('toggleSoundBtn').innerText = gameState.soundEnabled ? "ON" : "OFF";
-        }
-
-        // --- PERSISTENCE (LocalStorage) ---
-        function saveState() {
-            gameState.lastSaveTime = Date.now();
-            localStorage.setItem('cyber_gem_miner_state', JSON.stringify(gameState));
-        }
-
-        function loadSavedState() {
-            const saved = localStorage.getItem('cyber_gem_miner_state');
-            if (saved) {
-                try {
-                    const parsed = JSON.parse(saved);
-                    gameState = { ...gameState, ...parsed };
-
-                    // Passive Offline Earnings Calculation
-                    const now = Date.now();
-                    const secondsOffline = Math.floor((now - (gameState.lastSaveTime || now)) / 1000);
-                    if (secondsOffline > 10 && gameState.autoMinerRate > 0) {
-                        const earnedOffline = Math.min(secondsOffline * gameState.autoMinerRate, 50000); // cap offline earn
-                        gameState.gems += earnedOffline;
-                        setTimeout(() => {
-                            alertModal(`Welcome back! Your Cyber Auto-Bot mined ${earnedOffline.toLocaleString()} Gems while you were offline.`);
-                        }, 500);
-                    }
-                } catch(e) {
-                    console.error("Failed to parse saved state", e);
-                }
-            }
-        }
-    </script>
+scheduleVein();
+render();
+})();
+</script>
 </body>
-                                </html>
+</html>
