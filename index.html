@@ -38,7 +38,7 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
     <!-- Adsgram SDK -->
-    <script src="https://sad.adsgram.ai/js/adsgram.js" onerror="window.adsgramLoadFailed = true;"></script>
+    <script src="https://sad.adsgram.ai/js/adsgram.js"></script>
 
     <style>
         body {
@@ -88,24 +88,6 @@
     </style>
 </head>
 <body class="text-white min-h-screen flex flex-col justify-between overflow-x-hidden selection:bg-cyberCyan selection:text-black">
-
-    <!-- TELEGRAM RESTRICTION OVERLAY (Shown if opened outside Telegram WebApp) -->
-    <div id="telegramRestrictionOverlay" class="fixed inset-0 bg-cyberDark z-50 flex flex-col items-center justify-center p-6 text-center space-y-5 hidden">
-        <div class="w-20 h-20 rounded-full bg-cyan-500/10 border border-cyberCyan flex items-center justify-center text-cyberCyan text-4xl shadow-cyanGlow">
-            <i class="fa-brands fa-telegram"></i>
-        </div>
-        <div class="space-y-2 max-w-xs">
-            <h2 class="text-xl font-black text-white">Telegram Access Only</h2>
-            <p class="text-xs text-gray-400 leading-relaxed">
-                This Mini App is strictly configured to run inside Telegram. Please open this app using the official Telegram Bot WebApp button.
-            </p>
-        </div>
-        <div class="pt-2">
-            <span class="inline-block px-4 py-2 bg-cyberCard border border-cyberBorder rounded-xl text-xs font-mono text-cyberCyan">
-                t.me/YourBotName_bot/app
-            </span>
-        </div>
-    </div>
 
     <!-- TOAST NOTIFICATION CONTAINER -->
     <div id="toastContainer" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 w-11/12 max-w-xs space-y-2 pointer-events-none"></div>
@@ -336,7 +318,7 @@
             </div>
         </section>
 
-        <!-- TAB 5: SETTINGS & LEGAL POLICIES -->
+        <!-- TAB 5: SETTINGS & LEGAL POLICIES (ADSGRAM RULE 1 & 12 COMPLIANCE) -->
         <section id="tab-settings" class="tab-content hidden space-y-3.5">
             <div class="bg-cyberCard p-4 rounded-2xl border border-cyberBorder">
                 <h3 class="text-base font-bold text-white flex items-center gap-2">
@@ -378,7 +360,7 @@
         </section>
     </main>
 
-    <!-- EXPLICIT AD CONFIRMATION MODAL -->
+    <!-- EXPLICIT AD CONFIRMATION MODAL (RULE 5 & RULE 8 COMPLIANT - ZERO ACCIDENTAL CLICKS) -->
     <div id="adConfirmationModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-cyberCard border border-purple-500/40 rounded-2xl max-w-xs w-full p-5 text-center space-y-3.5 shadow-purpleGlow">
             <div class="w-14 h-14 rounded-full bg-purple-500/20 text-cyberPurple mx-auto flex items-center justify-center text-2xl border border-purple-500/30">
@@ -396,22 +378,6 @@
                     Watch Now
                 </button>
             </div>
-        </div>
-    </div>
-
-    <!-- ADBLOCKER DETECTION MODAL -->
-    <div id="adBlockerModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-cyberCard border border-red-500/50 rounded-2xl max-w-xs w-full p-5 text-center space-y-3.5 shadow-lg">
-            <div class="w-14 h-14 rounded-full bg-red-500/20 text-red-400 mx-auto flex items-center justify-center text-2xl border border-red-500/30">
-                <i class="fa-solid fa-shield-virus"></i>
-            </div>
-            <h3 class="text-base font-bold text-white">AdBlocker Detected</h3>
-            <p class="text-xs text-gray-300">
-                Unable to load rewarded ad stream. Please disable your AdBlocker or DNS ad filter to claim rewards.
-            </p>
-            <button onclick="closeModal('adBlockerModal')" class="w-full py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold text-xs rounded-xl transition-colors">
-                Understand & Retry
-            </button>
         </div>
     </div>
 
@@ -520,29 +486,8 @@
             }
         }
 
-        // Validate Telegram Environment Execution
-        function verifyTelegramEnvironment() {
-            const isTelegram = window.Telegram && window.Telegram.WebApp && (
-                window.Telegram.WebApp.initData !== "" || 
-                window.Telegram.WebApp.platform === 'android' || 
-                window.Telegram.WebApp.platform === 'ios' || 
-                window.Telegram.WebApp.platform === 'tdesktop'
-            );
-
-            if (!isTelegram) {
-                document.getElementById('telegramRestrictionOverlay').classList.remove('hidden');
-                return false;
-            }
-            return true;
-        }
-
         // Initialization
         window.addEventListener('load', () => {
-            // Enforce Telegram Environment
-            if (!verifyTelegramEnvironment()) {
-                return;
-            }
-
             // Telegram WebApp Setup
             if (window.Telegram && window.Telegram.WebApp) {
                 window.Telegram.WebApp.ready();
@@ -558,8 +503,8 @@
             // Restore Save Game State
             loadSavedState();
 
-            // Initialize Adsgram SDK Safe Mode
-            if (window.Adsgram && !window.adsgramLoadFailed) {
+            // Initialize Adsgram SDK
+            if (window.Adsgram) {
                 try {
                     // Replace blockId with your real Adsgram Block ID from Adsgram Dashboard
                     adsgramController = window.Adsgram.init({ blockId: "57487" });
@@ -715,13 +660,8 @@
             }, 3000);
         }
 
-        // Adsgram Rewarded Video Workflow with AdBlocker Detection
+        // Adsgram Rewarded Video Workflow
         function openAdModal(rewardType) {
-            if (window.adsgramLoadFailed) {
-                openModal('adBlockerModal');
-                return;
-            }
-
             currentAdRewardType = rewardType;
             const desc = document.getElementById('adModalDesc');
             if (rewardType === 'energy') {
@@ -741,12 +681,8 @@
                 adsgramController.show().then((result) => {
                     onAdWatchedSuccess();
                 }).catch((error) => {
-                    console.log("Adsgram Ad Error / Blocked / Skipped:", error);
-                    if (error && (error.error === true || error.description === 'Adblock')) {
-                        openModal('adBlockerModal');
-                    } else {
-                        showToast("Ad missed. Reward not granted.", "red");
-                    }
+                    console.log("Adsgram Ad Error / Skipped:", error);
+                    showToast("Ad missed. Reward not granted.", "red");
                 });
             } else {
                 // Development / Moderation Sandbox Mode
@@ -842,4 +778,4 @@
         }
     </script>
 </body>
-</html>
+                  </html>
