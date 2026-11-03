@@ -1,952 +1,525 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FREE FILES OF SENSI </title>
+    <title>4DR X SENSI </title>
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- Telegram WebApp SDK & Adsgram SDK -->
+    <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <!-- Adsgram SDK -->
     <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
 
-    <!-- Firebase SDKs -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
 
-        // Firebase Configuration
-        const firebaseConfig = {
-          apiKey: "AIzaSyAo2syMed9Aka-1dFO5rsc5xSpncUF3gn0",
-          authDomain: "freesensi-272a9.firebaseapp.com",
-          projectId: "freesensi-272a9",
-          storageBucket: "freesensi-272a9.firebasestorage.app",
-          messagingSenderId: "860968212642",
-          appId: "1:860968212642:web:3638e8924f5f8923325ffb"
-        };
+    <!-- Canvas Confetti for Completion Celebration -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // Expose Firebase DB & Auth globally
-        window.firebaseDb = db;
-        window.firebaseAuth = auth;
-        window.firebaseModules = {
-            collection,
-            doc,
-            getDoc,
-            setDoc,
-            addDoc,
-            updateDoc,
-            deleteDoc,
-            onSnapshot,
-            increment,
-            serverTimestamp
-        };
-    </script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Orbitron:wght@500;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        cyber: {
-                            red: '#ff003c',
-                            darkred: '#4a0012',
-                            black: '#070304',
-                            card: '#12070a',
-                            border: '#3a0c16',
-                            glow: '#ff2a5f',
-                            emerald: '#00ff88'
-                        }
-                    },
-                    fontFamily: {
-                        orbitron: ['Orbitron', 'sans-serif'],
-                        mono: ['Fira Code', 'monospace'],
-                        sans: ['Inter', 'sans-serif']
-                    }
-                }
-            }
-        }
-    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Rajdhani:wght@700;800&display=swap" rel="stylesheet">
 
     <style>
         body {
-            background-color: #070304;
-            color: #e5e7eb;
             font-family: 'Inter', sans-serif;
-            overflow-x: hidden;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-
-        #matrix-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 0;
-            pointer-events: none;
-            opacity: 0.75;
-        }
-
-        .glass-panel {
-            background: rgba(18, 7, 10, 0.88);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            border: 1px solid rgba(255, 0, 60, 0.25);
-            box-shadow: 0 8px 32px 0 rgba(255, 0, 60, 0.15);
-        }
-
-        .glass-panel-glow {
-            border: 1px solid rgba(255, 0, 60, 0.6);
-            box-shadow: 0 0 25px rgba(255, 0, 60, 0.4);
-        }
-
-        .cyber-button {
-            background: linear-gradient(135deg, #ff003c 0%, #80001c 100%);
-            transition: all 0.25s ease;
-            box-shadow: 0 0 15px rgba(255, 0, 60, 0.4);
-            font-family: 'Orbitron', sans-serif;
-            letter-spacing: 1px;
-        }
-
-        .cyber-button:hover:not(:disabled) {
-            box-shadow: 0 0 25px rgba(255, 0, 60, 0.85);
-            transform: translateY(-2px);
-        }
-
-        .cyber-button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            filter: grayscale(80%);
-        }
-
-        .cyber-input {
-            background: rgba(7, 3, 4, 0.85);
-            border: 1px solid rgba(255, 0, 60, 0.3);
+            background-color: #07040f;
             color: #ffffff;
-            transition: all 0.3s ease;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        .cyber-input:focus {
-            outline: none;
-            border-color: #ff003c;
-            box-shadow: 0 0 12px rgba(255, 0, 60, 0.6);
+        /* Glowing Neon Title */
+        .title-glow {
+            font-family: 'Rajdhani', 'Inter', sans-serif;
+            letter-spacing: 2px;
+            text-shadow: 0 0 20px rgba(168, 85, 247, 0.6), 0 0 40px rgba(147, 51, 234, 0.3), 0 0 60px rgba(219, 39, 119, 0.2);
         }
 
-        .glow-text {
-            text-shadow: 0 0 10px rgba(255, 0, 60, 0.8);
+        /* Glassmorphism Card Style */
+        .card-shadow {
+            background: linear-gradient(165deg, rgba(25, 14, 45, 0.85) 0%, rgba(14, 8, 28, 0.95) 100%);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(168, 85, 247, 0.25);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.9), 0 0 30px rgba(124, 58, 237, 0.12);
         }
 
-        ::-webkit-scrollbar {
-            width: 6px;
+        /* Animated Glowing Border for Logo Card */
+        .logo-box {
+            box-shadow: 0 0 25px rgba(239, 68, 68, 0.3), 0 0 50px rgba(147, 51, 234, 0.15);
+            animation: floating-logo 4s ease-in-out infinite alternate;
         }
-        ::-webkit-scrollbar-track {
-            background: #070304;
+
+        @keyframes floating-logo {
+            0% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-4px) scale(1.01); }
+            100% { transform: translateY(0px) scale(1); }
         }
-        ::-webkit-scrollbar-thumb {
-            background: #660018;
-            border-radius: 4px;
+
+        /* Primary Dynamic Button Gradient */
+        .btn-purple {
+            background: linear-gradient(180deg, #5b2ca0 0%, #3a1a6b 100%);
+            border: 1px solid rgba(192, 132, 252, 0.4);
+            box-shadow: 0 4px 15px rgba(88, 28, 135, 0.4);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-purple:hover {
+            border-color: rgba(216, 180, 254, 0.7);
+            box-shadow: 0 6px 20px rgba(147, 51, 234, 0.5);
+        }
+
+        .btn-purple:active {
+            transform: scale(0.97);
+            background: linear-gradient(180deg, #472180 0%, #2a1150 100%);
+        }
+
+        /* Ready to Download State Button */
+        .btn-ready {
+            background: linear-gradient(180deg, #9333ea 0%, #6b21a8 100%) !important;
+            border-color: rgba(233, 213, 255, 0.8) !important;
+            box-shadow: 0 0 25px rgba(168, 85, 247, 0.7);
+            animation: pulse-border 1.8s infinite;
+        }
+
+        @keyframes pulse-border {
+            0%, 100% { box-shadow: 0 0 15px rgba(168, 85, 247, 0.5); transform: scale(1); }
+            50% { box-shadow: 0 0 30px rgba(219, 39, 119, 0.8); transform: scale(1.02); }
+        }
+
+        /* Shimmer Loading Sweep */
+        .shimmer::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                60deg,
+                transparent 30%,
+                rgba(255, 255, 255, 0.15) 50%,
+                transparent 70%
+            );
+            transform: rotate(30deg);
+            animation: shimmer-effect 3s infinite;
+        }
+
+        @keyframes shimmer-effect {
+            0% { transform: translate(-100%, -100%) rotate(30deg); }
+            100% { transform: translate(100%, 100%) rotate(30deg); }
+        }
+
+        /* Progress Bar Animation */
+        .progress-bar-fill {
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Ambient Glow Spheres */
+        .glow-orb-1 {
+            background: radial-gradient(circle, rgba(147, 51, 234, 0.25) 0%, rgba(0, 0, 0, 0) 70%);
+            animation: pulse-orb 6s ease-in-out infinite alternate;
+        }
+
+        .glow-orb-2 {
+            background: radial-gradient(circle, rgba(219, 39, 119, 0.2) 0%, rgba(0, 0, 0, 0) 70%);
+            animation: pulse-orb 8s ease-in-out infinite alternate-reverse;
+        }
+
+        @keyframes pulse-orb {
+            0% { opacity: 0.5; transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1.15); }
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col relative selection:bg-cyber-red selection:text-white pb-20">
+<body class="flex flex-col items-center justify-between min-h-screen p-4 select-none relative">
 
-    <!-- Red Matrix Rain Canvas -->
-    <canvas id="matrix-canvas"></canvas>
+    <!-- Background Canvas for Particles -->
+    <canvas id="bgCanvas" class="fixed inset-0 w-full h-full pointer-events-none z-0"></canvas>
 
-    <div class="relative z-10 flex flex-col min-h-screen">
+    <!-- Animated Ambient Lighting Orbs -->
+    <div class="glow-orb-1 fixed -top-20 left-1/2 -translate-x-1/2 w-96 h-96 rounded-full pointer-events-none z-0"></div>
+    <div class="glow-orb-2 fixed bottom-0 left-1/4 w-80 h-80 rounded-full pointer-events-none z-0"></div>
 
-        <!-- TELEGRAM APP HEADER -->
-        <header class="glass-panel sticky top-0 z-40 border-b border-cyber-red/30 px-4 py-3">
-            <div class="max-w-4xl mx-auto flex items-center justify-between">
-                
-                <div class="flex items-center space-x-3">
-                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-cyber-red to-cyber-darkred flex items-center justify-center shadow-lg shadow-cyber-red/40 border border-cyber-red/50">
-                        <i class="fa-solid fa-folder-closed text-lg text-white"></i>
-                    </div>
-                    <div>
-                        <h1 class="font-orbitron text-lg font-bold text-white tracking-wider glow-text">
-                            CYBER<span class="text-cyber-red">VAULT</span>
-                        </h1>
-                        <p class="text-[9px] text-gray-400 font-mono tracking-widest uppercase">Telegram Adsgram Downloader</p>
-                    </div>
-                </div>
+    <!-- Main App Container -->
+    <div class="w-full max-w-md my-auto flex flex-col items-center z-10 py-4">
 
-                <div class="text-[10px] font-mono px-3 py-1.5 rounded-lg bg-cyber-red/10 border border-cyber-red/30 text-cyber-red flex items-center space-x-1.5">
-                    <i class="fa-solid fa-shield-halved"></i>
-                    <span>6 ADS REQUIRED</span>
-                </div>
-            </div>
-        </header>
-
-        <!-- ANNOUNCEMENT BAR -->
-        <div id="announcement-bar" class="bg-cyber-darkred/40 border-b border-cyber-red/20 py-2 px-4 text-center text-[11px] font-mono text-gray-300 backdrop-blur-sm flex items-center justify-center space-x-2">
-            <span class="px-1.5 py-0.5 rounded bg-cyber-red text-white text-[9px] font-bold uppercase">NOTICE</span>
-            <span id="announcement-text">Watch 6 Ads to unlock direct high-speed files! AdBlock must be disabled.</span>
+        <!-- Top Header Banner -->
+        <div class="text-center mb-5 pt-2">
+            <h1 class="text-3xl sm:text-4xl font-black text-white title-glow tracking-wider uppercase mb-1">
+                FREE SENSI !
+            </h1>
+            <p class="text-[10px] sm:text-xs font-bold text-purple-300/80 tracking-[0.25em] uppercase">
+                PREMIUM REWARDS PORTAL
+            </p>
         </div>
 
-        <!-- MAIN LAYOUT: FILES & FOLDER GRID -->
-        <main class="flex-grow max-w-4xl mx-auto w-full px-4 py-5 space-y-5">
+        <!-- Glassmorphism Card Wrapper -->
+        <div class="w-full card-shadow rounded-3xl p-5 sm:p-6 flex flex-col items-center text-center relative overflow-hidden">
             
-            <div class="flex items-center justify-between font-mono">
-                <h2 class="text-sm md:text-base font-bold text-white uppercase tracking-wider flex items-center space-x-2">
-                    <i class="fa-solid fa-folder-tree text-cyber-red"></i>
-                    <span>AVAILABLE FILE FOLDERS</span>
-                </h2>
-                <span id="folder-count-badge" class="text-[11px] px-2.5 py-1 rounded-full bg-cyber-red/20 border border-cyber-red/40 text-cyber-red font-bold">
-                    0 Folders
-                </span>
-            </div>
-
-            <!-- FOLDERS GRID CONTAINER -->
-            <div id="folders-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <!-- Dynamically populated folder cards -->
-            </div>
-
-        </main>
-
-        <!-- FOOTER -->
-        <footer class="glass-panel border-t border-cyber-red/20 py-4 px-4 mt-auto">
-            <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between text-[11px] text-gray-400 font-mono gap-2 text-center">
-                <div id="footer-text">&copy; 2026 CYBERVAULT Mini App. Powered by Adsgram SDK.</div>
-                <div class="flex items-center space-x-3">
-                    <span class="text-emerald-400 font-bold flex items-center"><i class="fa-solid fa-shield-halved mr-1"></i> Anti-AdBlock Active</span>
-                </div>
-            </div>
-        </footer>
-
-    </div>
-
-    <!-- 6-ADS UNLOCK MODAL (ADSGRAM INTEGRATION) -->
-    <div id="unlock-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4">
-        <div class="glass-panel-glow bg-cyber-black rounded-2xl w-full max-w-md border border-cyber-red/60 p-6 space-y-5 relative">
-            
-            <button onclick="closeUnlockModal()" class="absolute top-4 right-4 text-gray-400 hover:text-cyber-red text-xl">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-
-            <!-- Folder Header Info inside Modal -->
-            <div class="flex items-center space-x-3 border-b border-cyber-red/30 pb-4">
-                <img id="modal-folder-thumb" src="" alt="Thumbnail" class="w-14 h-14 rounded-xl object-cover border border-cyber-red/50">
-                <div class="overflow-hidden">
-                    <span id="modal-folder-tag" class="px-2 py-0.5 rounded bg-cyber-red/30 text-cyber-red text-[10px] font-mono font-bold uppercase">FILE FOLDER</span>
-                    <h3 id="modal-folder-name" class="font-orbitron font-bold text-white text-base truncate mt-0.5">Folder Name</h3>
-                    <p id="modal-folder-size" class="text-xs font-mono text-gray-400">Size: ~0 MB</p>
-                </div>
-            </div>
-
-            <!-- AdBlock Alert Banner (Shows when AdBlock is detected) -->
-            <div id="adblock-alert-box" class="hidden p-3 rounded-xl bg-red-950/80 border border-cyber-red text-xs font-mono text-red-200 space-y-1">
-                <div class="font-bold flex items-center text-cyber-red">
-                    <i class="fa-solid fa-triangle-exclamation text-sm mr-2"></i>
-                    <span>AdBlock Detected or Ad Failed!</span>
-                </div>
-                <p class="text-[11px] text-gray-300">
-                    Adsgram advertisement could not load. Please <b>DISABLE YOUR ADBLOCKER</b> or Brave Shields to proceed.
-                </p>
-            </div>
-
-            <!-- Ads Counter & Progress Bar -->
-            <div class="space-y-2">
-                <div class="flex justify-between items-center text-xs font-mono">
-                    <span class="text-gray-300 font-bold uppercase">Adsgram Unlock Progress</span>
-                    <span id="ad-counter-text" class="text-cyber-red font-bold font-orbitron text-sm">0 / 6 ADS</span>
-                </div>
-
-                <div class="w-full bg-black rounded-full h-3.5 overflow-hidden border border-cyber-red/40 p-0.5">
-                    <div id="ad-progress-bar" class="bg-gradient-to-r from-cyber-darkred via-cyber-red to-cyber-glow h-full rounded-full transition-all duration-300 w-0"></div>
-                </div>
-
-                <p id="ad-status-msg" class="text-[11px] font-mono text-gray-400 text-center">
-                    You must watch 6 Adsgram video ads completely to unlock the direct download link.
-                </p>
-            </div>
-
-            <!-- Ad Action Buttons -->
-            <div class="space-y-3 pt-2">
-                <!-- Watch Ad Button -->
-                <button id="btn-watch-ad" onclick="triggerAdsgramRewardAd()" class="cyber-button w-full py-3.5 rounded-xl font-bold text-white text-xs font-orbitron flex items-center justify-center space-x-2">
-                    <i class="fa-solid fa-play text-sm"></i>
-                    <span id="btn-watch-text">WATCH AD 1 OF 6</span>
-                </button>
-
-                <!-- Final Download Link (Tracks Download in Firebase on Click) -->
-                <a id="btn-download-file" onclick="handleFileDownloadClick(event)" href="#" target="_blank" class="hidden w-full py-3.5 rounded-xl font-bold text-white text-xs font-orbitron bg-gradient-to-r from-emerald-600 to-emerald-400 hover:from-emerald-500 hover:to-emerald-300 shadow-lg shadow-emerald-500/30 flex items-center justify-center space-x-2 text-center transition">
-                    <i class="fa-solid fa-cloud-arrow-down text-base"></i>
-                    <span>DOWNLOAD FILE NOW (UNLOCKED)</span>
-                </a>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- ADMIN LOGIN AUTH MODAL -->
-    <div id="admin-auth-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4">
-        <div class="glass-panel-glow bg-cyber-black rounded-2xl w-full max-w-sm border border-cyber-red/60 p-6 space-y-4 relative">
-            <button onclick="closeAdminAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-cyber-red text-xl">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-            <div class="text-center space-y-1">
-                <div class="w-12 h-12 rounded-full bg-cyber-red/20 border border-cyber-red flex items-center justify-center mx-auto text-cyber-red text-xl">
-                    <i class="fa-solid fa-lock"></i>
-                </div>
-                <h3 class="font-orbitron font-bold text-white text-lg">HIGH PROTECTION ADMIN</h3>
-                <p class="text-xs font-mono text-gray-400">Enter secure password to access control panel</p>
-            </div>
-            <form onsubmit="handleAdminLogin(event)" class="space-y-4">
-                <div>
-                    <label class="text-[10px] font-mono text-gray-300 uppercase">Admin Password</label>
-                    <input type="password" id="admin-password-input" required placeholder="••••••••" class="cyber-input w-full px-3 py-2.5 rounded-xl text-xs font-mono mt-1">
-                </div>
-                <button type="submit" class="cyber-button w-full py-3 rounded-xl font-bold text-white text-xs font-orbitron">
-                    AUTHENTICATE & ENTER
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- ADMIN CONTROL PANEL MODAL -->
-    <div id="admin-panel-modal" class="fixed inset-0 z-50 bg-black/95 backdrop-blur-lg hidden flex flex-col p-4 overflow-y-auto">
-        <div class="max-w-5xl mx-auto w-full glass-panel-glow bg-cyber-black rounded-2xl border border-cyber-red/60 p-6 space-y-6 my-auto">
-            
-            <!-- Admin Header -->
-            <div class="flex items-center justify-between border-b border-cyber-red/30 pb-4">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-xl bg-cyber-red flex items-center justify-center text-white text-xl">
-                        <i class="fa-solid fa-sliders"></i>
-                    </div>
-                    <div>
-                        <h2 class="font-orbitron font-bold text-white text-lg">ADMIN CONTROL DASHBOARD</h2>
-                        <p class="text-xs font-mono text-gray-400">Manage Folders, Adsgram Blocks & View Accurate Download Analytics</p>
-                    </div>
-                </div>
-                <button onclick="closeAdminPanel()" class="px-4 py-2 rounded-xl bg-cyber-red/20 border border-cyber-red text-cyber-red text-xs font-mono font-bold hover:bg-cyber-red hover:text-white transition">
-                    <i class="fa-solid fa-right-from-bracket mr-1"></i> EXIT ADMIN
-                </button>
-            </div>
-
-            <!-- ANALYTICS CARDS -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div class="glass-panel p-4 rounded-xl border border-cyber-red/40 flex items-center justify-between">
-                    <div>
-                        <p class="text-[10px] font-mono text-gray-400 uppercase">Accurate File Downloads</p>
-                        <h4 id="stat-total-downloads" class="text-2xl font-orbitron font-bold text-cyber-emerald mt-1">0</h4>
-                        <p class="text-[9px] font-mono text-gray-400">Downloaded after 6 ads</p>
-                    </div>
-                    <div class="w-10 h-10 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center text-xl">
-                        <i class="fa-solid fa-download"></i>
-                    </div>
-                </div>
-
-                <div class="glass-panel p-4 rounded-xl border border-cyber-red/40 flex items-center justify-between">
-                    <div>
-                        <p class="text-[10px] font-mono text-gray-400 uppercase">Total Adsgram Ads Watched</p>
-                        <h4 id="stat-total-ads" class="text-2xl font-orbitron font-bold text-cyber-red mt-1">0</h4>
-                        <p class="text-[9px] font-mono text-gray-400">6 ads per successful download</p>
-                    </div>
-                    <div class="w-10 h-10 rounded-lg bg-cyber-red/20 border border-cyber-red/40 text-cyber-red flex items-center justify-center text-xl">
-                        <i class="fa-solid fa-eye"></i>
-                    </div>
-                </div>
-
-                <div class="glass-panel p-4 rounded-xl border border-cyber-red/40 flex items-center justify-between">
-                    <div>
-                        <p class="text-[10px] font-mono text-gray-400 uppercase">Active Folders</p>
-                        <h4 id="stat-total-folders" class="text-2xl font-orbitron font-bold text-white mt-1">0</h4>
-                        <p class="text-[9px] font-mono text-gray-400">Loaded in database</p>
-                    </div>
-                    <div class="w-10 h-10 rounded-lg bg-blue-500/20 border border-blue-500/40 text-blue-400 flex items-center justify-center text-xl">
-                        <i class="fa-solid fa-folder-open"></i>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ADMIN TABS & CONTROLS -->
-            <div class="space-y-4">
-                
-                <!-- Section 1: Manage File Folders -->
-                <div class="glass-panel p-5 rounded-xl border border-cyber-red/30 space-y-4">
-                    <div class="flex items-center justify-between">
-                        <h3 class="font-orbitron text-sm font-bold text-white flex items-center">
-                            <i class="fa-solid fa-plus-circle text-cyber-red mr-2"></i> Add / Modify File Folder
-                        </h3>
-                    </div>
-
-                    <form onsubmit="handleSaveFolder(event)" class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono">
-                        <input type="hidden" id="form-folder-id">
-                        <div>
-                            <label class="text-gray-300">File Folder Title</label>
-                            <input type="text" id="form-folder-name" required placeholder="e.g. GTA 5 Mod Pack.zip" class="cyber-input w-full px-3 py-2 rounded-lg mt-1">
-                        </div>
-                        <div>
-                            <label class="text-gray-300">Category Tag</label>
-                            <input type="text" id="form-folder-tag" required placeholder="GAME MODS / SOFTWARE" class="cyber-input w-full px-3 py-2 rounded-lg mt-1">
-                        </div>
-                        <div>
-                            <label class="text-gray-300">File Size</label>
-                            <input type="text" id="form-folder-size" required placeholder="e.g. 1.8 GB" class="cyber-input w-full px-3 py-2 rounded-lg mt-1">
-                        </div>
-                        <div>
-                            <label class="text-gray-300">Direct File Download URL</label>
-                            <input type="url" id="form-folder-url" required placeholder="https://example.com/file.zip" class="cyber-input w-full px-3 py-2 rounded-lg mt-1">
-                        </div>
-                        <div class="sm:col-span-2">
-                            <label class="text-gray-300">Thumbnail Image URL</label>
-                            <input type="url" id="form-folder-thumb" required placeholder="https://images.unsplash.com/photo-..." class="cyber-input w-full px-3 py-2 rounded-lg mt-1">
-                        </div>
-                        <div class="sm:col-span-2 flex space-x-2 pt-2">
-                            <button type="submit" class="cyber-button px-6 py-2.5 rounded-lg text-white font-bold font-orbitron text-xs">
-                                <i class="fa-solid fa-floppy-disk mr-1"></i> SAVE FOLDER TO FIREBASE
-                            </button>
-                            <button type="button" onclick="resetFolderForm()" class="px-4 py-2.5 rounded-lg bg-gray-800 text-gray-300 hover:bg-gray-700 font-bold text-xs">
-                                RESET FORM
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- Section 2: Adsgram 6-Block IDs & Admin Security Options -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Logo Artwork Box -->
+            <div class="logo-box w-56 h-56 sm:w-64 sm:h-64 rounded-2xl overflow-hidden mb-5 relative border border-red-500/40 bg-black flex-shrink-0">
+                <svg class="w-full h-full object-cover" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="300" height="300" fill="#090205"/>
+                    <circle cx="150" cy="150" r="120" fill="url(#moon_grad)" opacity="0.85"/>
                     
-                    <!-- Adsgram Block IDs Settings -->
-                    <div class="glass-panel p-4 rounded-xl border border-cyber-red/30 space-y-3">
-                        <h3 class="font-orbitron text-xs font-bold text-white flex items-center">
-                            <i class="fa-solid fa-rectangle-ad text-cyber-red mr-2"></i> Customize Adsgram 6 Block IDs
-                        </h3>
-                        <div class="grid grid-cols-2 gap-2 text-xs font-mono">
-                            <div>
-                                <label class="text-[10px] text-gray-400">Ad 1 Block ID</label>
-                                <input type="text" id="ad-block-0" class="cyber-input w-full px-2 py-1.5 rounded mt-0.5">
-                            </div>
-                            <div>
-                                <label class="text-[10px] text-gray-400">Ad 2 Block ID</label>
-                                <input type="text" id="ad-block-1" class="cyber-input w-full px-2 py-1.5 rounded mt-0.5">
-                            </div>
-                            <div>
-                                <label class="text-[10px] text-gray-400">Ad 3 Block ID</label>
-                                <input type="text" id="ad-block-2" class="cyber-input w-full px-2 py-1.5 rounded mt-0.5">
-                            </div>
-                            <div>
-                                <label class="text-[10px] text-gray-400">Ad 4 Block ID</label>
-                                <input type="text" id="ad-block-3" class="cyber-input w-full px-2 py-1.5 rounded mt-0.5">
-                            </div>
-                            <div>
-                                <label class="text-[10px] text-gray-400">Ad 5 Block ID</label>
-                                <input type="text" id="ad-block-4" class="cyber-input w-full px-2 py-1.5 rounded mt-0.5">
-                            </div>
-                            <div>
-                                <label class="text-[10px] text-gray-400">Ad 6 Block ID</label>
-                                <input type="text" id="ad-block-5" class="cyber-input w-full px-2 py-1.5 rounded mt-0.5">
-                            </div>
-                        </div>
-                        <button onclick="saveAdsgramConfig()" class="cyber-button w-full py-2 rounded-lg text-white font-bold text-xs font-orbitron mt-2">
-                            UPDATE ADSGRAM BLOCK CONFIG
-                        </button>
-                    </div>
+                    <defs>
+                        <radialGradient id="moon_grad" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(150 150) rotate(90) scale(120)">
+                            <stop stop-color="#b30000"/>
+                            <stop offset="0.6" stop-color="#400000"/>
+                            <stop offset="1" stop-color="#090205"/>
+                        </radialGradient>
+                    </defs>
 
-                    <!-- Security Passcode Customization -->
-                    <div class="glass-panel p-4 rounded-xl border border-cyber-red/30 space-y-3">
-                        <h3 class="font-orbitron text-xs font-bold text-white flex items-center">
-                            <i class="fa-solid fa-key text-cyber-red mr-2"></i> Security: Customize Admin Password
-                        </h3>
-                        <form onsubmit="handleAdminPasswordChange(event)" class="space-y-3 text-xs font-mono">
-                            <div>
-                                <label class="text-gray-300">New Admin Password</label>
-                                <input type="password" id="new-admin-password" required placeholder="Enter new secret password" class="cyber-input w-full px-3 py-2 rounded-lg mt-1">
-                            </div>
-                            <button type="submit" class="cyber-button w-full py-2 rounded-lg text-white font-bold text-xs font-orbitron">
-                                UPDATE SECURITY PASSWORD
-                            </button>
-                        </form>
-                    </div>
-                </div>
+                    <!-- Star Graphics -->
+                    <path d="M70 100 L76 120 L96 120 L80 132 L86 152 L70 140 L54 152 L60 132 L44 120 L64 120 Z" fill="#ff2a2a"/>
+                    <path d="M220 230 L224 242 L236 242 L226 250 L230 262 L220 254 L210 262 L214 250 L204 242 L216 242 Z" fill="#ff2a2a"/>
 
-                <!-- Section 3: Live Real-time Download Event Logs -->
-                <div class="glass-panel p-4 rounded-xl border border-cyber-red/30 space-y-3">
-                    <h3 class="font-orbitron text-xs font-bold text-white flex items-center justify-between">
-                        <span><i class="fa-solid fa-list-check text-cyber-red mr-2"></i> Real-Time Completed Download Logs</span>
-                        <span class="text-[10px] font-mono text-gray-400">Recorded after 6 Ads Watch Completion</span>
-                    </h3>
-                    <div class="max-h-48 overflow-y-auto space-y-2 font-mono text-xs" id="download-logs-container">
-                        <div class="text-gray-500 text-center py-4">No download logs recorded yet.</div>
-                    </div>
-                </div>
+                    <!-- Glowing SQ X SENSI Logo Typography -->
+                    <g filter="drop-shadow(0px 6px 12px rgba(0,0,0,0.95))">
+                        <text x="150" y="145" text-anchor="middle" fill="#FFFFFF" font-family="'Inter', sans-serif" font-weight="900" font-size="64" letter-spacing="-2">SQ</text>
+                        <text x="150" y="202" text-anchor="middle" fill="#FF2A2A" font-family="'Inter', sans-serif" font-weight="900" font-size="46" letter-spacing="-1">X SENSI</text>
+                    </g>
+                </svg>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none"></div>
+            </div>
+
+            <!-- Task Titles -->
+            <h2 class="text-lg sm:text-xl font-bold text-white mb-1 tracking-tight">
+                Complete task to get FREE SENSI!
+            </h2>
+            <p class="text-xs sm:text-sm text-purple-200/70 mb-4 max-w-xs font-normal">
+                Watch all ads and complete verification to unlock.
+            </p>
+
+            <!-- Ad Completion Progress Indicator Bar -->
+            <div class="w-full bg-purple-950/60 border border-purple-500/20 rounded-full h-2.5 mb-5 overflow-hidden p-0.5">
+                <div id="progressBar" class="progress-bar-fill h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full" style="width: 0%;"></div>
+            </div>
+
+            <!-- Interactive Buttons Grid -->
+            <div class="w-full space-y-3">
+                
+                <!-- Action 1: Unlock / Watch Ad Button -->
+                <button id="unlockBtn" onclick="handleWatchAd()" class="w-full btn-purple shimmer py-3.5 px-5 rounded-2xl font-bold text-sm sm:text-base text-white flex items-center justify-center space-x-2.5 shadow-xl transition-all">
+                    <i id="unlockIcon" class="fa-solid fa-play text-xs text-purple-200"></i>
+                    <span id="unlockBtnText">Unlock Sensi (0/6)</span>
+                </button>
+
+                <!-- Action 2: Verify Task Button -->
+                <button id="verifyBtn" onclick="handleVerifyTask()" class="w-full btn-purple py-3.5 px-5 rounded-2xl font-bold text-sm sm:text-base text-white flex items-center justify-center space-x-2.5 shadow-lg opacity-85">
+                    <i id="verifyIcon" class="fa-solid fa-circle-check text-sm text-purple-300"></i>
+                    <span>Verify Task</span>
+                </button>
 
             </div>
 
         </div>
+
+        <!-- Footer Notice -->
+        <p class="text-[10px] text-purple-300/40 mt-4 text-center font-medium">
+             Verified Secure Download
+        </p>
+
     </div>
 
-    <!-- TOAST NOTIFICATION -->
-    <div id="toast-message" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 glass-panel-glow bg-cyber-black px-5 py-3 rounded-xl border border-cyber-red text-xs font-mono text-white flex items-center space-x-3 shadow-2xl">
-        <i class="fa-solid fa-circle-check text-cyber-red text-base"></i>
-        <span id="toast-text">Notification message</span>
+    <!-- Notification Toast Popup -->
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md bg-[#1d0c36] border border-purple-500/40 text-purple-100 text-xs sm:text-sm rounded-2xl py-3.5 px-4 shadow-2xl flex items-center space-x-3 transition-all duration-300 opacity-0 pointer-events-none translate-y-4 z-50">
+        <i id="toastIcon" class="fa-solid fa-circle-info text-purple-400 text-base flex-shrink-0"></i>
+        <span id="toastMessage" class="flex-grow font-semibold">Please complete watching all ads first.</span>
     </div>
 
+    <!-- Download Modal Box -->
+    <div id="downloadModal" class="fixed inset-0 backdrop-blur-md bg-black/80 flex items-center justify-center p-4 z-50 hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-[#1a0c33] border border-purple-500/50 rounded-3xl p-6 w-full max-w-sm text-center shadow-2xl transform scale-90 transition-transform duration-300 relative overflow-hidden" id="modalContent">
+            
+            <div class="w-16 h-16 bg-purple-600/20 border border-purple-400/30 rounded-2xl flex items-center justify-center mx-auto mb-4 text-purple-300 text-2xl shadow-inner">
+                <i class="fa-solid fa-file-circle-check"></i>
+            </div>
+
+            <h3 class="text-xl font-extrabold text-white mb-1 tracking-wide">Verification Passed!</h3>
+            <p class="text-xs text-purple-200/70 mb-6 leading-relaxed">Your premium FREE SENSI package is now unlocked and ready to download.</p>
+
+            <a id="downloadLink" href="https://example.com/SQ_SENSI_Package.zip" download target="_blank" onclick="closeModal()" class="w-full btn-ready py-3.5 px-4 rounded-xl font-bold text-sm text-white flex items-center justify-center space-x-2 block shadow-xl transition-all">
+                <i class="fa-solid fa-download"></i>
+                <span>Download FREE SENSI File</span>
+            </a>
+
+            <button onclick="closeModal()" class="mt-4 text-xs font-medium text-purple-400/80 hover:text-purple-200 transition-colors py-1">
+                Close Window
+            </button>
+        </div>
+    </div>
+
+    <!-- Logic Controller Script -->
     <script>
-        // HARDCODED DEFAULT FILE FOLDERS LIST (FALLBACK IF FIREBASE IS EMPTY/OFFLINE)
-        let APP_FOLDERS = [
-            {
-                id: '1',
-                name: 'FREE SENSI ANDROID',
-                tag: 'ALL ANDROID',
-                size: '2MN',
-                thumb: 'https://i.ibb.co/xtDZ35mC/IMG-20261018-025848-380.jpg',
-                url: 'https://drive.google.com/drive/folders/1-gTsX9qisUIC1u3lT2Eum2XPrHUPeQzL',
-                downloads: 0
-            },
-            
+        // Configuration: 6 Adsgram Block IDs mapping to steps 1 to 6
+        const ADSGRAM_BLOCK_IDS = [
+            "int-57670",
+            "int-57671",
+            "int-57672",
+            "int-57673",
+            "57674",
+            "57618"
         ];
+        
+        const TOTAL_ADS_REQUIRED = ADSGRAM_BLOCK_IDS.length; // 6
+        const FILE_DOWNLOAD_URL = "https://t.me/+W7V-GEnQyqE0ZjU1"; // Customize your download link here
 
-        // ADSGRAM BLOCK CONFIGURATION
-        let ADSGRAM_BLOCK_IDS = JSON.parse(localStorage.getItem('ADSGRAM_BLOCK_IDS')) || [
-            "int-57670", "int-57671", "int-57672", "int-57673", "57674", "57618"
-        ];
+        let currentAdStep = 0;
+        let isAdLoading = false;
 
-        // ADMIN PASSWORD (STORED IN LOCALSTORAGE WITH FALLBACK DEFAULT 'admin128')
-        let ADMIN_PASSWORD = localStorage.getItem('CYBERVAULT_ADMIN_PASS') || 'admin128';
+        // Initialize App on Load
+        window.addEventListener('DOMContentLoaded', () => {
+            initTelegramSDK();
+            initBackgroundParticles();
+            updateUI();
+        });
 
-        // STATE FOR ACTIVE MODAL UNLOCK
-        let activeFolder = null;
-        let currentAdCount = 0;
-        const TARGET_ADS = 6;
-        let totalGlobalDownloads = 0;
-
-        // INITIALIZE ON WINDOW LOAD
-        window.onload = function() {
+        // 1. Initialize Telegram WebApp SDK
+        function initTelegramSDK() {
             if (window.Telegram && window.Telegram.WebApp) {
-                window.Telegram.WebApp.ready();
-                window.Telegram.WebApp.expand();
+                const tg = window.Telegram.WebApp;
+                tg.ready();
+                tg.expand();
+                if (tg.setHeaderColor) tg.setHeaderColor('#07040f');
+                if (tg.setBackgroundColor) tg.setBackgroundColor('#07040f');
             }
-
-            renderFoldersGrid();
-            initMatrixRain();
-            initFirebaseListeners();
-            loadAdsgramBlockInputs();
-        };
-
-        // FIREBASE SNAPSHOT LISTENERS FOR REALTIME DATA & ANALYTICS
-        function initFirebaseListeners() {
-            const checkFirebaseReady = setInterval(() => {
-                if (window.firebaseDb && window.firebaseAuth && window.firebaseModules) {
-                    clearInterval(checkFirebaseReady);
-                    
-                    const db = window.firebaseDb;
-                    const { collection, doc, onSnapshot } = window.firebaseModules;
-                    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-
-                    // 1. Listen for Dynamic Folders
-                    const foldersRef = collection(db, 'artifacts', appId, 'public', 'data', 'folders');
-                    onSnapshot(foldersRef, (snapshot) => {
-                        if (!snapshot.empty) {
-                            const dynamicFolders = [];
-                            snapshot.forEach((doc) => {
-                                dynamicFolders.push({ id: doc.id, ...doc.data() });
-                            });
-                            APP_FOLDERS = dynamicFolders;
-                            renderFoldersGrid();
-                            updateAdminAnalytics();
-                        }
-                    }, (err) => console.warn("Folders snapshot error:", err));
-
-                    // 2. Listen for Analytics Stats (Accurate Downloads)
-                    const statsDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'analytics', 'global');
-                    onSnapshot(statsDocRef, (snap) => {
-                        if (snap.exists()) {
-                            const data = snap.data();
-                            totalGlobalDownloads = data.totalDownloads || 0;
-                            updateAdminAnalytics();
-                        }
-                    }, (err) => console.warn("Analytics snapshot error:", err));
-
-                    // 3. Listen for Live Download Logs
-                    const logsRef = collection(db, 'artifacts', appId, 'public', 'data', 'download_logs');
-                    onSnapshot(logsRef, (snapshot) => {
-                        const logsContainer = document.getElementById('download-logs-container');
-                        if (snapshot.empty) {
-                            logsContainer.innerHTML = '<div class="text-gray-500 text-center py-4">No download logs recorded yet.</div>';
-                            return;
-                        }
-                        let html = '';
-                        snapshot.forEach((doc) => {
-                            const log = doc.data();
-                            html += `
-                                <div class="p-2 rounded bg-cyber-darkred/30 border border-cyber-red/20 flex items-center justify-between">
-                                    <div class="truncate pr-2">
-                                        <span class="text-emerald-400 font-bold">[VERIFIED 6 ADS]</span> 
-                                        <span class="text-white">${log.folderName || 'File'}</span>
-                                    </div>
-                                    <span class="text-[10px] text-gray-400 font-mono">${log.timestamp ? new Date(log.timestamp.toDate()).toLocaleTimeString() : 'Just now'}</span>
-                                </div>
-                            `;
-                        });
-                        logsContainer.innerHTML = html;
-                    }, (err) => console.warn("Logs snapshot error:", err));
-                }
-            }, 300);
         }
 
-        // RENDER FOLDER CARDS GRID
-        function renderFoldersGrid() {
-            const grid = document.getElementById('folders-grid');
-            const badge = document.getElementById('folder-count-badge');
-            
-            badge.innerText = `${APP_FOLDERS.length} Folders`;
-            grid.innerHTML = '';
+        // 2. Dynamic Adsgram Handler with Block Rotation
+        function handleWatchAd() {
+            if (isAdLoading) return;
 
-            APP_FOLDERS.forEach(folder => {
-                const card = document.createElement('div');
-                card.className = 'glass-panel rounded-2xl p-4 flex flex-col justify-between space-y-3 hover:border-cyber-red/60 transition duration-300 group';
-                
-                card.innerHTML = `
-                    <div class="space-y-3">
-                        <div class="relative w-full h-36 rounded-xl overflow-hidden bg-black border border-cyber-red/30">
-                            <img src="${folder.thumb}" alt="${folder.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='https://placehold.co/600x400/12070a/ff003c?text=Folder+Thumb'">
-                            <span class="absolute top-2 left-2 px-2 py-0.5 rounded bg-black/80 text-cyber-red text-[9px] font-mono font-bold uppercase border border-cyber-red/40">
-                                ${folder.tag}
-                            </span>
-                            <span class="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-black/80 text-gray-300 text-[10px] font-mono">
-                                <i class="fa-solid fa-hard-drive text-cyber-red mr-1"></i>${folder.size}
-                            </span>
-                        </div>
-
-                        <div>
-                            <h3 class="font-orbitron text-xs md:text-sm font-bold text-white line-clamp-2">${folder.name}</h3>
-                            <div class="flex items-center justify-between text-[10px] font-mono text-gray-400 mt-1">
-                                <span>Requires 6 Adsgram Ads</span>
-                                <span class="text-emerald-400"><i class="fa-solid fa-download text-[9px] mr-0.5"></i>${folder.downloads || 0}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <button onclick="openUnlockModal('${folder.id}')" class="cyber-button w-full py-2.5 rounded-xl text-xs font-bold text-white flex items-center justify-center space-x-2">
-                        <i class="fa-solid fa-lock text-xs"></i>
-                        <span>UNLOCK FOLDER (0/6 ADS)</span>
-                    </button>
-                `;
-                grid.appendChild(card);
-            });
-        }
-
-        // HANDLE FILE DOWNLOAD CLICK (INCREMENT ACCURATE DOWNLOAD & ADS COUNTER IN FIREBASE)
-        async function handleFileDownloadClick(event) {
-            if (currentAdCount < TARGET_ADS) {
-                event.preventDefault();
-                showToast("You must complete 6/6 Ads to download!");
+            if (currentAdStep >= TOTAL_ADS_REQUIRED) {
+                showToast("All ads completed! Click 'Verify Task' to download.", "success");
                 return;
             }
 
-            // Increment local and database accurate analytics
-            totalGlobalDownloads++;
-            updateAdminAnalytics();
+            const currentBlockId = ADSGRAM_BLOCK_IDS[currentAdStep];
+            isAdLoading = true;
 
-            if (window.firebaseDb && window.firebaseModules) {
-                try {
-                    const db = window.firebaseDb;
-                    const { doc, setDoc, addDoc, collection, increment, serverTimestamp } = window.firebaseModules;
-                    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-
-                    // 1. Update Global Downloads & Ads Watched Counter
-                    const statsDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'analytics', 'global');
-                    await setDoc(statsDocRef, {
-                        totalDownloads: increment(1),
-                        totalAdsWatched: increment(6)
-                    }, { merge: true });
-
-                    // 2. Update Per-Folder Download Count
-                    if (activeFolder && activeFolder.id) {
-                        const folderDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'folders', activeFolder.id);
-                        await setDoc(folderDocRef, {
-                            downloads: increment(1)
-                        }, { merge: true });
-                    }
-
-                    // 3. Log Recent Download Event
-                    const logsRef = collection(db, 'artifacts', appId, 'public', 'data', 'download_logs');
-                    await addDoc(logsRef, {
-                        folderId: activeFolder ? activeFolder.id : 'unknown',
-                        folderName: activeFolder ? activeFolder.name : 'Unknown File',
-                        adsCompleted: 6,
-                        timestamp: serverTimestamp()
-                    });
-                } catch(e) {
-                    console.warn("Analytics write warning:", e);
-                }
-            }
-
-            showToast("Accurate Download Verified & Download Started!");
-        }
-
-        // ADMIN PANEL AUTHENTICATION
-        function openAdminAuthModal() {
-            document.getElementById('admin-auth-modal').classList.remove('hidden');
-        }
-
-        function closeAdminAuthModal() {
-            document.getElementById('admin-auth-modal').classList.add('hidden');
-            document.getElementById('admin-password-input').value = '';
-        }
-
-        function handleAdminLogin(e) {
-            e.preventDefault();
-            const inputPass = document.getElementById('admin-password-input').value;
-            if (inputPass === ADMIN_PASSWORD) {
-                closeAdminAuthModal();
-                openAdminPanel();
-                showToast("Admin Authenticated Successfully!");
-            } else {
-                showToast("Invalid Admin Password!");
-            }
-        }
-
-        function openAdminPanel() {
-            updateAdminAnalytics();
-            document.getElementById('admin-panel-modal').classList.remove('hidden');
-        }
-
-        function closeAdminPanel() {
-            document.getElementById('admin-panel-modal').classList.add('hidden');
-        }
-
-        function updateAdminAnalytics() {
-            document.getElementById('stat-total-downloads').innerText = totalGlobalDownloads;
-            document.getElementById('stat-total-ads').innerText = totalGlobalDownloads * 6;
-            document.getElementById('stat-total-folders').innerText = APP_FOLDERS.length;
-        }
-
-        // SAVE NEW / EDIT FOLDER TO FIREBASE
-        async function handleSaveFolder(e) {
-            e.preventDefault();
-            const id = document.getElementById('form-folder-id').value || `folder_${Date.now()}`;
-            const folderData = {
-                id: id,
-                name: document.getElementById('form-folder-name').value,
-                tag: document.getElementById('form-folder-tag').value.toUpperCase(),
-                size: document.getElementById('form-folder-size').value,
-                url: document.getElementById('form-folder-url').value,
-                thumb: document.getElementById('form-folder-thumb').value,
-                downloads: 0
-            };
-
-            if (window.firebaseDb && window.firebaseModules) {
-                try {
-                    const db = window.firebaseDb;
-                    const { doc, setDoc } = window.firebaseModules;
-                    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-                    
-                    const folderRef = doc(db, 'artifacts', appId, 'public', 'data', 'folders', id);
-                    await setDoc(folderRef, folderData, { merge: true });
-                    showToast("Folder Saved to Firebase!");
-                } catch(e) {
-                    console.error("Firebase save error:", e);
-                    saveFolderLocally(folderData);
-                }
-            } else {
-                saveFolderLocally(folderData);
-            }
-
-            resetFolderForm();
-        }
-
-        function saveFolderLocally(folderData) {
-            const index = APP_FOLDERS.findIndex(f => f.id === folderData.id);
-            if (index >= 0) {
-                APP_FOLDERS[index] = folderData;
-            } else {
-                APP_FOLDERS.push(folderData);
-            }
-            renderFoldersGrid();
-            updateAdminAnalytics();
-            showToast("Folder Saved Locally!");
-        }
-
-        function resetFolderForm() {
-            document.getElementById('form-folder-id').value = '';
-            document.getElementById('form-folder-name').value = '';
-            document.getElementById('form-folder-tag').value = '';
-            document.getElementById('form-folder-size').value = '';
-            document.getElementById('form-folder-url').value = '';
-            document.getElementById('form-folder-thumb').value = '';
-        }
-
-        // ADSGRAM CONFIG MANAGMENT
-        function loadAdsgramBlockInputs() {
-            for(let i=0; i<6; i++) {
-                const el = document.getElementById(`ad-block-${i}`);
-                if (el) el.value = ADSGRAM_BLOCK_IDS[i] || `block-10${i+1}`;
-            }
-        }
-
-        function saveAdsgramConfig() {
-            for(let i=0; i<6; i++) {
-                const val = document.getElementById(`ad-block-${i}`).value.trim();
-                if (val) ADSGRAM_BLOCK_IDS[i] = val;
-            }
-            localStorage.setItem('ADSGRAM_BLOCK_IDS', JSON.stringify(ADSGRAM_BLOCK_IDS));
-            showToast("Adsgram Block IDs updated!");
-        }
-
-        // UPDATE ADMIN PASSWORD
-        function handleAdminPasswordChange(e) {
-            e.preventDefault();
-            const newPass = document.getElementById('new-admin-password').value;
-            if (newPass) {
-                ADMIN_PASSWORD = newPass;
-                localStorage.setItem('CYBERVAULT_ADMIN_PASS', newPass);
-                document.getElementById('new-admin-password').value = '';
-                showToast("Admin Password Updated Successfully!");
-            }
-        }
-
-        // OPEN ADSGRAM UNLOCK MODAL
-        function openUnlockModal(folderId) {
-            activeFolder = APP_FOLDERS.find(f => f.id === folderId);
-            if (!activeFolder) return;
-
-            currentAdCount = 0;
-            document.getElementById('adblock-alert-box').classList.add('hidden');
-            
-            document.getElementById('modal-folder-name').innerText = activeFolder.name;
-            document.getElementById('modal-folder-size').innerText = `Est. Size: ${activeFolder.size}`;
-            document.getElementById('modal-folder-tag').innerText = activeFolder.tag;
-            document.getElementById('modal-folder-thumb').src = activeFolder.thumb;
-            
-            document.getElementById('btn-download-file').href = activeFolder.url;
-
-            updateAdProgressUI();
-            document.getElementById('unlock-modal').classList.remove('hidden');
-        }
-
-        function closeUnlockModal() {
-            document.getElementById('unlock-modal').classList.add('hidden');
-            activeFolder = null;
-        }
-
-        // UPDATE AD PROGRESS UI & BUTTON STATE
-        function updateAdProgressUI() {
-            const counterText = document.getElementById('ad-counter-text');
-            const progressBar = document.getElementById('ad-progress-bar');
-            const watchBtn = document.getElementById('btn-watch-ad');
-            const watchText = document.getElementById('btn-watch-text');
-            const downloadBtn = document.getElementById('btn-download-file');
-            const statusMsg = document.getElementById('ad-status-msg');
-
-            counterText.innerText = `${currentAdCount} / ${TARGET_ADS} ADS`;
-            const percentage = Math.floor((currentAdCount / TARGET_ADS) * 100);
-            progressBar.style.width = `${percentage}%`;
-
-            if (currentAdCount >= TARGET_ADS) {
-                watchBtn.classList.add('hidden');
-                downloadBtn.classList.remove('hidden');
-                statusMsg.innerHTML = '<span class="text-emerald-400 font-bold"><i class="fa-solid fa-circle-check mr-1"></i> 6/6 Ads Verified! Your file link is unlocked.</span>';
-            } else {
-                watchBtn.classList.remove('hidden');
-                downloadBtn.classList.add('hidden');
-                watchText.innerText = `WATCH AD ${currentAdCount + 1} OF 6`;
-                statusMsg.innerText = `You must watch 6 Adsgram video ads completely to unlock the direct download link.`;
-            }
-        }
-
-        // TRIGGER ADSGRAM REWARD AD SCRIPT WITH 6 DEDICATED BLOCK IDS
-        function triggerAdsgramRewardAd() {
-            const alertBox = document.getElementById('adblock-alert-box');
-            alertBox.classList.add('hidden');
-
-            const currentBlockId = ADSGRAM_BLOCK_IDS[currentAdCount] || 'block-101';
+            // UI Feedback during request
+            const unlockBtnText = document.getElementById('unlockBtnText');
+            const unlockIcon = document.getElementById('unlockIcon');
+            unlockBtnText.innerText = "Loading Ad...";
+            unlockIcon.className = "fa-solid fa-spinner fa-spin text-xs text-purple-200";
 
             if (window.Adsgram) {
                 try {
-                    const AdController = window.Adsgram.init({
-                        blockId: currentBlockId,
-                        debug: false
-                    });
+                    const AdController = window.Adsgram.init({ blockId: currentBlockId });
 
                     AdController.show().then((result) => {
-                        currentAdCount++;
-                        updateAdProgressUI();
-                        showToast(`Ad ${currentAdCount}/6 verified!`);
+                        // User completed watching ad
+                        onAdSuccess();
                     }).catch((error) => {
-                        console.error("Adsgram error or AdBlock detected:", error);
-                        alertBox.classList.remove('hidden');
-                        showToast("Ad blocked or failed to load. Disable AdBlock!");
+                        console.warn("Adsgram execution failed/dismissed:", error);
+                        // If blocked or previewing without domain verification, provide fallback in preview mode
+                        if (isLocalOrPreview()) {
+                            onAdSuccess("[Demo]");
+                        } else {
+                            showToast("Ad display interrupted. Please try again.", "error");
+                            resetAdBtnState();
+                        }
                     });
-                } catch(e) {
-                    console.error("Adsgram init error:", e);
-                    alertBox.classList.remove('hidden');
+                } catch (err) {
+                    console.error("Adsgram init error:", err);
+                    if (isLocalOrPreview()) {
+                        onAdSuccess("[Demo]");
+                    } else {
+                        showToast("Failed to initialize ad network.", "error");
+                        resetAdBtnState();
+                    }
                 }
             } else {
-                alertBox.classList.remove('hidden');
-                showToast("Adsgram SDK blocked by browser extension!");
+                // Standalone environment fallback simulation
+                setTimeout(() => {
+                    onAdSuccess("[Demo]");
+                }, 800);
             }
         }
 
-        // RED MATRIX BACKGROUND ANIMATION
-        function initMatrixRain() {
-            const canvas = document.getElementById('matrix-canvas');
-            if (!canvas) return;
+        function onAdSuccess(tag = "") {
+            currentAdStep++;
+            isAdLoading = false;
+            updateUI();
+            
+            if (currentAdStep === TOTAL_ADS_REQUIRED) {
+                // Trigger celebratory confetti
+                triggerConfetti();
+                showToast("All ads completed! Click 'Verify Task' now.", "success");
+            } else {
+                showToast(`${tag} Ad ${currentAdStep} completed! Watch next to progress.`, "success");
+            }
+        }
+
+        function resetAdBtnState() {
+            isAdLoading = false;
+            updateUI();
+        }
+
+        // 3. Task Verification Logic
+        function handleVerifyTask() {
+            if (currentAdStep >= TOTAL_ADS_REQUIRED) {
+                openModal();
+            } else {
+                const remaining = TOTAL_ADS_REQUIRED - currentAdStep;
+                showToast(`Watch all 6 ads to unlock! (${currentAdStep}/6 completed)`, "error");
+            }
+        }
+
+        // 4. Update UI Components
+        function updateUI() {
+            const unlockBtnText = document.getElementById('unlockBtnText');
+            const unlockIcon = document.getElementById('unlockIcon');
+            const unlockBtn = document.getElementById('unlockBtn');
+            const verifyBtn = document.getElementById('verifyBtn');
+            const progressBar = document.getElementById('progressBar');
+
+            // Progress percentage
+            const percentage = Math.min((currentAdStep / TOTAL_ADS_REQUIRED) * 100, 100);
+            progressBar.style.width = `${percentage}%`;
+
+            if (currentAdStep >= TOTAL_ADS_REQUIRED) {
+                unlockBtnText.innerText = `Completed (${TOTAL_ADS_REQUIRED}/${TOTAL_ADS_REQUIRED})`;
+                unlockIcon.className = "fa-solid fa-check text-xs text-purple-200";
+                unlockBtn.classList.remove('shimmer');
+                unlockBtn.classList.add('opacity-70');
+
+                // Highlight Verify Button
+                verifyBtn.classList.add('btn-ready');
+                verifyBtn.classList.remove('opacity-85');
+            } else {
+                unlockBtnText.innerText = `Unlock Sensi (${currentAdStep}/${TOTAL_ADS_REQUIRED})`;
+                unlockIcon.className = "fa-solid fa-play text-xs text-purple-200";
+            }
+        }
+
+        // Helper check for browser canvas preview environments
+        function isLocalOrPreview() {
+            return (
+                window.location.protocol === 'file:' ||
+                window.location.hostname === 'localhost' ||
+                window.location.hostname === '127.0.0.1' ||
+                !window.Adsgram
+            );
+        }
+
+        // 5. Toast Notification Dialog
+        let toastTimeout;
+        function showToast(message, type = "info") {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            const toastIcon = document.getElementById('toastIcon');
+
+            toastMessage.innerText = message;
+
+            if (type === "error") {
+                toastIcon.className = "fa-solid fa-circle-exclamation text-rose-400 text-base flex-shrink-0";
+            } else if (type === "success") {
+                toastIcon.className = "fa-solid fa-circle-check text-emerald-400 text-base flex-shrink-0";
+            } else {
+                toastIcon.className = "fa-solid fa-circle-info text-purple-400 text-base flex-shrink-0";
+            }
+
+            toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4');
+            toast.classList.add('opacity-100', 'translate-y-0');
+
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
+            }, 3200);
+        }
+
+        // 6. Download Modal Handlers
+        function openModal() {
+            const modal = document.getElementById('downloadModal');
+            const modalContent = document.getElementById('modalContent');
+            const downloadLink = document.getElementById('downloadLink');
+            
+            downloadLink.href = FILE_DOWNLOAD_URL;
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modalContent.classList.remove('scale-90');
+                modalContent.classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('downloadModal');
+            const modalContent = document.getElementById('modalContent');
+
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-90');
+            modal.classList.add('opacity-0');
+
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        // 7. Confetti Effect
+        function triggerConfetti() {
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 80,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    colors: ['#a855f7', '#ec4899', '#3b82f6', '#ffffff']
+                });
+            }
+        }
+
+        // 8. Animated Background Canvas (Particles)
+        function initBackgroundParticles() {
+            const canvas = document.getElementById('bgCanvas');
             const ctx = canvas.getContext('2d');
 
-            function resizeCanvas() {
+            function resize() {
                 canvas.width = window.innerWidth;
                 canvas.height = window.innerHeight;
             }
-            resizeCanvas();
-            window.addEventListener('resize', resizeCanvas);
+            resize();
+            window.addEventListener('resize', resize);
 
-            const chars = '0123456789ABCDEFｦｱｳｴｵｶｷｹｺｻｼｽｾｿﾀﾂﾃﾅﾆﾇﾈﾊﾋﾎﾏﾐﾑﾒﾓﾔﾕﾗﾘﾜ';
-            const fontSize = 14;
-            const columns = Math.floor(canvas.width / fontSize);
-            const drops = new Array(columns).fill(1);
+            const particles = Array.from({ length: 30 }, () => ({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                radius: Math.random() * 1.5 + 0.5,
+                color: Math.random() > 0.5 ? 'rgba(168, 85, 247, ' : 'rgba(236, 72, 153, ',
+                alpha: Math.random() * 0.5 + 0.2,
+                vy: -Math.random() * 0.4 - 0.1
+            }));
 
-            function drawMatrix() {
-                ctx.fillStyle = 'rgba(7, 3, 4, 0.08)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                ctx.fillStyle = '#ff003c';
-                ctx.font = `${fontSize}px monospace`;
-
-                for (let i = 0; i < drops.length; i++) {
-                    const char = chars.charAt(Math.floor(Math.random() * chars.length));
-                    const x = i * fontSize;
-                    const y = drops[i] * fontSize;
-
-                    ctx.fillText(char, x, y);
-
-                    if (y > canvas.height && Math.random() > 0.975) {
-                        drops[i] = 0;
+            function render() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(p => {
+                    p.y += p.vy;
+                    if (p.y < 0) {
+                        p.y = canvas.height;
+                        p.x = Math.random() * canvas.width;
                     }
-                    drops[i]++;
-                }
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color + p.alpha + ')';
+                    ctx.fill();
+                });
+                requestAnimationFrame(render);
             }
-
-            setInterval(drawMatrix, 33);
-        }
-
-        function showToast(msg) {
-            const toast = document.getElementById('toast-message');
-            document.getElementById('toast-text').innerText = msg;
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            toast.classList.add('translate-y-0', 'opacity-100');
-
-            setTimeout(() => {
-                toast.classList.remove('translate-y-0', 'opacity-100');
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
+            render();
         }
     </script>
 </body>
