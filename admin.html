@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - File Downloader & Adsgram Manager</title>
+  
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      background-color: #080000;
+      color: #ff3333;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 20px;
+      background: rgba(20, 0, 0, 0.8);
+      border: 1px solid #ff0000;
+      border-radius: 8px;
+      margin-bottom: 25px;
+      box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
+    }
+    h1, h2, h3 {
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .btn {
+      background: #ff0000;
+      color: #fff;
+      border: none;
+      padding: 10px 18px;
+      font-weight: bold;
+      border-radius: 5px;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+      transition: 0.2s ease;
+    }
+    .btn:hover {
+      background: #cc0000;
+      box-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
+    }
+    .btn-secondary {
+      background: #333;
+      border: 1px solid #666;
+    }
+    .btn-secondary:hover {
+      background: #444;
+    }
+    .btn-danger {
+      background: #990000;
+    }
+    .btn-danger:hover {
+      background: #bb0000;
+    }
+    
+    /* Login Modal */
+    .login-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.95);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .login-box {
+      background: #110000;
+      border: 2px solid #ff0000;
+      padding: 30px;
+      border-radius: 10px;
+      width: 100%;
+      max-width: 380px;
+      text-align: center;
+      box-shadow: 0 0 25px rgba(255, 0, 0, 0.5);
+    }
+    .login-box input {
+      width: 100%;
+      padding: 12px;
+      margin: 15px 0;
+      background: #000;
+      border: 1px solid #ff3333;
+      color: #fff;
+      border-radius: 5px;
+      font-size: 16px;
+      outline: none;
+    }
+
+    /* Dashboard Layout */
+    .dashboard {
+      display: none;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+    .stat-card {
+      background: rgba(20, 0, 0, 0.7);
+      border: 1px solid #ff0000;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .stat-card h4 {
+      font-size: 14px;
+      color: #aaa;
+      margin-bottom: 8px;
+    }
+    .stat-card .val {
+      font-size: 28px;
+      font-weight: bold;
+      color: #fff;
+      text-shadow: 0 0 10px #ff0000;
+    }
+
+    .panel-section {
+      background: rgba(15, 0, 0, 0.8);
+      border: 1px solid #880000;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 25px;
+    }
+    .panel-section h2 {
+      border-bottom: 1px solid #ff0000;
+      padding-bottom: 10px;
+      margin-bottom: 15px;
+      color: #fff;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: #ccc;
+      font-size: 14px;
+    }
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 10px;
+      background: #000;
+      border: 1px solid #aa0000;
+      color: #fff;
+      border-radius: 5px;
+      outline: none;
+    }
+    .form-row {
+      display: flex;
+      gap: 15px;
+    }
+    .form-row .form-group {
+      flex: 1;
+    }
+
+    /* Folder Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #330000;
+    }
+    th {
+      background: #200000;
+      color: #ff6666;
+    }
+    td {
+      color: #eee;
+    }
+    .thumb-preview {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 4px;
+      border: 1px solid #ff0000;
+    }
+    .actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .adsgram-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 15px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Login Protection Screen -->
+  <div class="login-overlay" id="loginModal">
+    <div class="login-box">
+      <h2>Admin Access</h2>
+      <p style="color: #888; font-size: 13px; margin-top: 5px;">Enter security password to access control panel</p>
+      <input type="password" id="adminPasswordInput" placeholder="Enter Password">
+      <button class="btn" style="width: 100%;" onclick="verifyPassword()">Unlock Panel</button>
+      <div id="loginError" style="color: #ff3333; margin-top: 10px; font-size: 13px;"></div>
+    </div>
+  </div>
+
+  <div class="container dashboard" id="adminDashboard">
+    <header>
+      <h1>Red Matrix Admin Panel</h1>
+      <div>
+        <button class="btn btn-secondary" onclick="openPasswordSettings()">Change Pass</button>
+        <button class="btn btn-danger" onclick="logout()">Lock Panel</button>
+      </div>
+    </header>
+
+    <!-- Analytics Overview -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h4>Total Completed Downloads</h4>
+        <div class="val" id="statDownloads">0</div>
+      </div>
+      <div class="stat-card">
+        <h4>Adsgram Impressions (6 Ads/DL)</h4>
+        <div class="val" id="statAds">0</div>
+      </div>
+      <div class="stat-card">
+        <h4>Total Active Folders</h4>
+        <div class="val" id="statFolders">0</div>
+      </div>
+    </div>
+
+    <!-- Folder Management -->
+    <div class="panel-section">
+      <h2>Manage Downloader Folders</h2>
+      
+      <form id="folderForm" onsubmit="saveFolder(event)">
+        <input type="hidden" id="folderId">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Folder Title</label>
+            <input type="text" id="folderTitle" placeholder="e.g. Premium VIP Sensi Pack" required>
+          </div>
+          <div class="form-group">
+            <label>File Size / Info</label>
+            <input type="text" id="folderSize" placeholder="e.g. 15.4 MB" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Custom Thumbnail URL</label>
+            <input type="url" id="folderThumb" placeholder="https://example.com/image.png" required>
+          </div>
+          <div class="form-group">
+            <label>Direct Download Link</label>
+            <input type="url" id="folderLink" placeholder="https://example.com/file.zip" required>
+          </div>
+        </div>
+
+        <button type="submit" class="btn" id="saveFolderBtn">Add New Folder</button>
+        <button type="button" class="btn btn-secondary" onclick="resetForm()">Clear Form</button>
+      </form>
+
+      <table id="foldersTable">
+        <thead>
+          <tr>
+            <th>Thumb</th>
+            <th>Title</th>
+            <th>Size</th>
+            <th>Downloads</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="foldersTableBody">
+          <!-- Loaded dynamically from Firebase -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Adsgram Configuration -->
+    <div class="panel-section">
+      <h2>Adsgram 6-Ad Block IDs</h2>
+      <p style="color: #aaa; font-size: 13px; margin-bottom: 15px;">Configure the 6 distinct Adsgram block IDs required for the user lock flow.</p>
+
+      <form onsubmit="saveAdsgramBlocks(event)">
+        <div class="adsgram-grid">
+          <div class="form-group"><label>Ad 1 Block ID</label><input type="text" id="adBlock1" required></div>
+          <div class="form-group"><label>Ad 2 Block ID</label><input type="text" id="adBlock2" required></div>
+          <div class="form-group"><label>Ad 3 Block ID</label><input type="text" id="adBlock3" required></div>
+          <div class="form-group"><label>Ad 4 Block ID</label><input type="text" id="adBlock4" required></div>
+          <div class="form-group"><label>Ad 5 Block ID</label><input type="text" id="adBlock5" required></div>
+          <div class="form-group"><label>Ad 6 Block ID</label><input type="text" id="adBlock6" required></div>
+        </div>
+        <button type="submit" class="btn">Save Adsgram Config</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Firebase Setup
+    const firebaseConfig = {
+      apiKey: "AIzaSyAo2syMed9Aka-1dFO5rsc5xSpncUF3gn0",
+      authDomain: "freesensi-272a9.firebaseapp.com",
+      projectId: "freesensi-272a9",
+      storageBucket: "freesensi-272a9.firebasestorage.app",
+      messagingSenderId: "860968212642",
+      appId: "1:860968212642:web:3638e8924f5f8923325ffb"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // Password SHA-256 Utility
+    async function hashPassword(str) {
+      const buffer = new TextEncoder().encode(str);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+      return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    // Default password hash for 'admin128'
+    let currentPassHash = localStorage.getItem('sys_admin_pass') || 'f3a4666f272a3927d312061e86053359d89ab5b49704ae1c01e6793e50663d27';
+
+    async function verifyPassword() {
+      const input = document.getElementById('adminPasswordInput').value;
+      const hashedInput = await hashPassword(input);
+
+      if (hashedInput === currentPassHash) {
+        document.getElementById('loginModal').style.display = 'none';
+        document.getElementById('adminDashboard').style.display = 'block';
+        loadDashboardData();
+      } else {
+        document.getElementById('loginError').innerText = 'Invalid Admin Security Password';
+      }
+    }
+
+    function logout() {
+      document.getElementById('loginModal').style.display = 'flex';
+      document.getElementById('adminDashboard').style.display = 'none';
+      document.getElementById('adminPasswordInput').value = '';
+    }
+
+    async function openPasswordSettings() {
+      const newPass = prompt("Enter new Admin Security Password:");
+      if (newPass && newPass.trim().length > 3) {
+        currentPassHash = await hashPassword(newPass.trim());
+        localStorage.setItem('sys_admin_pass', currentPassHash);
+        alert("Password updated successfully!");
+      } else if (newPass) {
+        alert("Password must be at least 4 characters.");
+      }
+    }
+
+    // Dashboard Data Sync
+    function loadDashboardData() {
+      // 1. Fetch Folders
+      db.collection('folders').onSnapshot(snapshot => {
+        const tbody = document.getElementById('foldersTableBody');
+        tbody.innerHTML = '';
+        let totalDl = 0;
+        let count = 0;
+
+        snapshot.forEach(doc => {
+          count++;
+          const data = doc.data();
+          const dlCount = data.downloadCount || 0;
+          totalDl += dlCount;
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><img src="${data.thumbUrl}" class="thumb-preview" alt="thumb"></td>
+            <td><strong>${data.title}</strong></td>
+            <td>${data.size}</td>
+            <td>${dlCount}</td>
+            <td class="actions">
+              <button class="btn btn-secondary" onclick="editFolder('${doc.id}', '${escape(data.title)}', '${data.size}', '${data.thumbUrl}', '${data.downloadUrl}')">Edit</button>
+              <button class="btn btn-danger" onclick="deleteFolder('${doc.id}')">Delete</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        document.getElementById('statFolders').innerText = count;
+        document.getElementById('statDownloads').innerText = totalDl;
+        document.getElementById('statAds').innerText = totalDl * 6;
+      });
+
+      // 2. Fetch Adsgram Config
+      db.collection('settings').doc('adsgram').get().then(doc => {
+        if (doc.exists) {
+          const blocks = doc.data().blocks || [];
+          for (let i = 0; i < 6; i++) {
+            document.getElementById(`adBlock${i+1}`).value = blocks[i] || `block-10${i+1}`;
+          }
+        } else {
+          for (let i = 0; i < 6; i++) {
+            document.getElementById(`adBlock${i+1}`).value = `block-10${i+1}`;
+          }
+        }
+      });
+    }
+
+    // Folder Actions
+    async function saveFolder(e) {
+      e.preventDefault();
+      const id = document.getElementById('folderId').value;
+      const folderData = {
+        title: document.getElementById('folderTitle').value.trim(),
+        size: document.getElementById('folderSize').value.trim(),
+        thumbUrl: document.getElementById('folderThumb').value.trim(),
+        downloadUrl: document.getElementById('folderLink').value.trim()
+      };
+
+      if (id) {
+        await db.collection('folders').doc(id).update(folderData);
+      } else {
+        folderData.downloadCount = 0;
+        folderData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+        await db.collection('folders').add(folderData);
+      }
+
+      resetForm();
+    }
+
+    function editFolder(id, title, size, thumbUrl, downloadUrl) {
+      document.getElementById('folderId').value = id;
+      document.getElementById('folderTitle').value = unescape(title);
+      document.getElementById('folderSize').value = size;
+      document.getElementById('folderThumb').value = thumbUrl;
+      document.getElementById('folderLink').value = downloadUrl;
+      document.getElementById('saveFolderBtn').innerText = 'Update Folder';
+    }
+
+    async function deleteFolder(id) {
+      if (confirm('Are you sure you want to delete this folder?')) {
+        await db.collection('folders').doc(id).delete();
+      }
+    }
+
+    function resetForm() {
+      document.getElementById('folderForm').reset();
+      document.getElementById('folderId').value = '';
+      document.getElementById('saveFolderBtn').innerText = 'Add New Folder';
+    }
+
+    // Save Adsgram Config
+    async function saveAdsgramBlocks(e) {
+      e.preventDefault();
+      const blocks = [];
+      for (let i = 1; i <= 6; i++) {
+        blocks.push(document.getElementById(`adBlock${i}`).value.trim());
+      }
+
+      await db.collection('settings').doc('adsgram').set({ blocks });
+      alert('Adsgram Block IDs updated successfully!');
+    }
+  </script>
+</body>
+</html>
