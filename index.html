@@ -1,360 +1,503 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Telegram File Downloader</title>
-  <!-- Telegram WebApp SDK -->
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <!-- Adsgram SDK -->
-  <script src="https://sad.adsgram.ai/js/sad-adsgram.js"></script>
-  
-  <style>
-    :root {
-      --bg-color: #0b0c10;
-      --card-bg: #1f2833;
-      --accent-color: #66fcf1;
-      --accent-hover: #45a29e;
-      --text-color: #c5c6c7;
-      --text-bright: #ffffff;
-      --danger-color: #ff4d4d;
-      --border-radius: 12px;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CYBERVAULT - Telegram Mini App Downloader</title>
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      user-select: none;
-    }
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
 
-    body {
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      min-height: 100vh;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-    }
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    header {
-      text-align: center;
-      margin-bottom: 20px;
-    }
+    <!-- Telegram WebApp SDK & Adsgram SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
 
-    header h1 {
-      color: var(--text-bright);
-      font-size: 1.4rem;
-      margin-bottom: 4px;
-    }
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Orbitron:wght@500;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    header p {
-      font-size: 0.85rem;
-      opacity: 0.8;
-    }
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: {
+                            red: '#ff003c',
+                            darkred: '#4a0012',
+                            black: '#070304',
+                            card: '#12070a',
+                            border: '#3a0c16',
+                            glow: '#ff2a5f',
+                            emerald: '#00ff88'
+                        }
+                    },
+                    fontFamily: {
+                        orbitron: ['Orbitron', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
 
-    .adblock-banner {
-      display: none;
-      background-color: var(--danger-color);
-      color: white;
-      padding: 12px;
-      border-radius: var(--border-radius);
-      margin-bottom: 16px;
-      text-align: center;
-      font-weight: bold;
-      font-size: 0.9rem;
-    }
+    <style>
+        body {
+            background-color: #070304;
+            color: #e5e7eb;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+        }
 
-    .folder-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: 16px;
-    }
+        #matrix-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.75;
+        }
 
-    .folder-card {
-      background-color: var(--card-bg);
-      border-radius: var(--border-radius);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-    }
+        .glass-panel {
+            background: rgba(18, 7, 10, 0.88);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 0, 60, 0.25);
+            box-shadow: 0 8px 32px 0 rgba(255, 0, 60, 0.15);
+        }
 
-    .folder-card:active {
-      transform: scale(0.97);
-    }
+        .glass-panel-glow {
+            border: 1px solid rgba(255, 0, 60, 0.6);
+            box-shadow: 0 0 25px rgba(255, 0, 60, 0.4);
+        }
 
-    .thumbnail-box {
-      width: 100%;
-      height: 120px;
-      background-color: #151a21;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
+        .cyber-button {
+            background: linear-gradient(135deg, #ff003c 0%, #80001c 100%);
+            transition: all 0.25s ease;
+            box-shadow: 0 0 15px rgba(255, 0, 60, 0.4);
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 1px;
+        }
 
-    .thumbnail-box img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
+        .cyber-button:hover:not(:disabled) {
+            box-shadow: 0 0 25px rgba(255, 0, 60, 0.85);
+            transform: translateY(-2px);
+        }
 
-    .folder-info {
-      padding: 10px;
-      text-align: center;
-    }
+        .cyber-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            filter: grayscale(80%);
+        }
 
-    .folder-info h3 {
-      color: var(--text-bright);
-      font-size: 0.95rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+        .cyber-input {
+            background: rgba(7, 3, 4, 0.85);
+            border: 1px solid rgba(255, 0, 60, 0.3);
+            color: #ffffff;
+            transition: all 0.3s ease;
+        }
 
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.85);
-      backdrop-filter: blur(5px);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
+        .cyber-input:focus {
+            outline: none;
+            border-color: #ff003c;
+            box-shadow: 0 0 12px rgba(255, 0, 60, 0.6);
+        }
 
-    .modal-card {
-      background: var(--card-bg);
-      border-radius: var(--border-radius);
-      padding: 24px;
-      width: 100%;
-      max-width: 340px;
-      text-align: center;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-      border: 1px solid rgba(102, 252, 241, 0.2);
-    }
+        .glow-text {
+            text-shadow: 0 0 10px rgba(255, 0, 60, 0.8);
+        }
 
-    .modal-card h2 {
-      color: var(--text-bright);
-      font-size: 1.2rem;
-      margin-bottom: 8px;
-    }
-
-    .modal-card p {
-      font-size: 0.85rem;
-      margin-bottom: 16px;
-    }
-
-    .counter-badge {
-      font-size: 1.8rem;
-      font-weight: bold;
-      color: var(--accent-color);
-      margin: 12px 0;
-    }
-
-    .progress-bar-bg {
-      background: rgba(255, 255, 255, 0.1);
-      height: 8px;
-      border-radius: 4px;
-      overflow: hidden;
-      margin-bottom: 20px;
-    }
-
-    .progress-bar-fill {
-      background: var(--accent-color);
-      height: 100%;
-      width: 0%;
-      transition: width 0.3s ease;
-    }
-
-    .btn {
-      width: 100%;
-      padding: 12px;
-      border: none;
-      border-radius: 8px;
-      background: var(--accent-color);
-      color: #000;
-      font-weight: bold;
-      font-size: 0.95rem;
-      cursor: pointer;
-      margin-bottom: 8px;
-    }
-
-    .btn-secondary {
-      background: transparent;
-      color: var(--text-color);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-  </style>
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #070304;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #660018;
+            border-radius: 4px;
+        }
+    </style>
 </head>
-<body>
+<body class="min-h-screen flex flex-col relative selection:bg-cyber-red selection:text-white pb-20">
 
-  <header>
-    <h1>File Vault</h1>
-    <p>Watch 6 required ads to unlock file download</p>
-  </header>
+    <!-- Red Matrix Rain Canvas -->
+    <canvas id="matrix-canvas"></canvas>
 
-  <div id="adblock-warning" class="adblock-banner">
-    ⚠️ AdBlock Detected! Disable AdBlocker to watch ads and access files.
-  </div>
+    <div class="relative z-10 flex flex-col min-h-screen">
 
-  <div id="folder-grid" class="folder-grid"></div>
+        <!-- TELEGRAM APP HEADER -->
+        <header class="glass-panel sticky top-0 z-40 border-b border-cyber-red/30 px-4 py-3">
+            <div class="max-w-4xl mx-auto flex items-center justify-between">
+                
+                <div class="flex items-center space-x-3">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-cyber-red to-cyber-darkred flex items-center justify-center shadow-lg shadow-cyber-red/40 border border-cyber-red/50">
+                        <i class="fa-solid fa-folder-closed text-lg text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-orbitron text-lg font-bold text-white tracking-wider glow-text">
+                            CYBER<span class="text-cyber-red">VAULT</span>
+                        </h1>
+                        <p class="text-[9px] text-gray-400 font-mono tracking-widest uppercase">Telegram Adsgram Downloader</p>
+                    </div>
+                </div>
 
-  <!-- Ad Modal -->
-  <div id="unlock-modal" class="modal-overlay">
-    <div class="modal-card">
-      <h2 id="modal-folder-title">Folder Name</h2>
-      <p>Watch 6 Ads to unlock your direct file download link.</p>
-      
-      <div id="counter-text" class="counter-badge">0 / 6 ADS</div>
-      
-      <div class="progress-bar-bg">
-        <div id="progress-fill" class="progress-bar-fill"></div>
-      </div>
+                <div class="text-[10px] font-mono px-3 py-1.5 rounded-lg bg-cyber-red/10 border border-cyber-red/30 text-cyber-red flex items-center space-x-1.5">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span>6 ADS REQUIRED</span>
+                </div>
+            </div>
+        </header>
 
-      <button id="watch-ad-btn" class="btn" onclick="playAd()">Watch Ad (+1)</button>
-      <button id="download-btn" class="btn" style="display: none;" onclick="triggerDownload()">Download File</button>
-      <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+        <!-- ANNOUNCEMENT BAR -->
+        <div id="announcement-bar" class="bg-cyber-darkred/40 border-b border-cyber-red/20 py-2 px-4 text-center text-[11px] font-mono text-gray-300 backdrop-blur-sm flex items-center justify-center space-x-2">
+            <span class="px-1.5 py-0.5 rounded bg-cyber-red text-white text-[9px] font-bold uppercase">NOTICE</span>
+            <span id="announcement-text">Watch 6 Ads to unlock direct high-speed files! AdBlock must be disabled.</span>
+        </div>
+
+        <!-- MAIN LAYOUT: FILES & FOLDER GRID -->
+        <main class="flex-grow max-w-4xl mx-auto w-full px-4 py-5 space-y-5">
+            
+            <div class="flex items-center justify-between font-mono">
+                <h2 class="text-sm md:text-base font-bold text-white uppercase tracking-wider flex items-center space-x-2">
+                    <i class="fa-solid fa-folder-tree text-cyber-red"></i>
+                    <span>AVAILABLE FILE FOLDERS</span>
+                </h2>
+                <span id="folder-count-badge" class="text-[11px] px-2.5 py-1 rounded-full bg-cyber-red/20 border border-cyber-red/40 text-cyber-red font-bold">
+                    0 Folders
+                </span>
+            </div>
+
+            <!-- FOLDERS GRID CONTAINER -->
+            <div id="folders-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Dynamically populated folder cards -->
+            </div>
+
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="glass-panel border-t border-cyber-red/20 py-4 px-4 mt-auto">
+            <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between text-[11px] text-gray-400 font-mono gap-2 text-center">
+                <div id="footer-text">&copy; 2026 CYBERVAULT Mini App. Powered by Adsgram SDK.</div>
+                <div class="flex items-center space-x-3">
+                    <span class="text-emerald-400 font-bold flex items-center"><i class="fa-solid fa-shield-halved mr-1"></i> Anti-AdBlock Active</span>
+                </div>
+            </div>
+        </footer>
+
     </div>
-  </div>
 
-  <script>
-    // Telegram WebApp Initialization
-    if (window.Telegram && window.Telegram.WebApp) {
-      window.Telegram.WebApp.ready();
-      window.Telegram.WebApp.expand();
-    }
+    <!-- 6-ADS UNLOCK MODAL (ADSGRAM INTEGRATION) -->
+    <div id="unlock-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="glass-panel-glow bg-cyber-black rounded-2xl w-full max-w-md border border-cyber-red/60 p-6 space-y-5 relative">
+            
+            <button onclick="closeUnlockModal()" class="absolute top-4 right-4 text-gray-400 hover:text-cyber-red text-xl">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
 
-    // Fixed 6 Adsgram Block IDs
-    const adsgramBlocks = [
-      "int-57670",
-      "int-57671",
-      "int-57672",
-      "int-57673",
-      "57674",
-      "57618"
-    ];
+            <!-- Folder Header Info inside Modal -->
+            <div class="flex items-center space-x-3 border-b border-cyber-red/30 pb-4">
+                <img id="modal-folder-thumb" src="" alt="Thumbnail" class="w-14 h-14 rounded-xl object-cover border border-cyber-red/50">
+                <div class="overflow-hidden">
+                    <span id="modal-folder-tag" class="px-2 py-0.5 rounded bg-cyber-red/30 text-cyber-red text-[10px] font-mono font-bold uppercase">FILE FOLDER</span>
+                    <h3 id="modal-folder-name" class="font-orbitron font-bold text-white text-base truncate mt-0.5">Folder Name</h3>
+                    <p id="modal-folder-size" class="text-xs font-mono text-gray-400">Size: ~0 MB</p>
+                </div>
+            </div>
 
-    // Add or edit your file folders here
-    const folders = [
-      { id: "1", name: "FREE PREMIUM SENSI", thumb: "https://i.ibb.co/xtDZ35mC/IMG-20261018-025848-380.jpg", url: "https://drive.google.com/drive/folders/1-gTsX9qisUIC1u3lT2Eum2XPrHUPeQzL" },
-      { id: "2", name: "Sample Pack 2", thumb: "https://via.placeholder.com/150/1f2833/66fcf1?text=File+2", url: "https://example.com/file2.zip" }
-    ];
+            <!-- AdBlock Alert Banner (Shows when AdBlock is detected) -->
+            <div id="adblock-alert-box" class="hidden p-3 rounded-xl bg-red-950/80 border border-cyber-red text-xs font-mono text-red-200 space-y-1">
+                <div class="font-bold flex items-center text-cyber-red">
+                    <i class="fa-solid fa-triangle-exclamation text-sm mr-2"></i>
+                    <span>AdBlock Detected or Ad Failed!</span>
+                </div>
+                <p class="text-[11px] text-gray-300">
+                    Adsgram advertisement could not load. Please <b>DISABLE YOUR ADBLOCKER</b> or Brave Shields to proceed.
+                </p>
+            </div>
 
-    let currentFolder = null;
-    let currentAdCount = 0;
+            <!-- Ads Counter & Progress Bar -->
+            <div class="space-y-2">
+                <div class="flex justify-between items-center text-xs font-mono">
+                    <span class="text-gray-300 font-bold uppercase">Adsgram Unlock Progress</span>
+                    <span id="ad-counter-text" class="text-cyber-red font-bold font-orbitron text-sm">0 / 6 ADS</span>
+                </div>
 
-    function renderFolders() {
-      const grid = document.getElementById('folder-grid');
-      grid.innerHTML = '';
+                <div class="w-full bg-black rounded-full h-3.5 overflow-hidden border border-cyber-red/40 p-0.5">
+                    <div id="ad-progress-bar" class="bg-gradient-to-r from-cyber-darkred via-cyber-red to-cyber-glow h-full rounded-full transition-all duration-300 w-0"></div>
+                </div>
 
-      if (folders.length === 0) {
-        grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; opacity:0.6;">No files available.</p>';
-        return;
-      }
+                <p id="ad-status-msg" class="text-[11px] font-mono text-gray-400 text-center">
+                    You must watch 6 Adsgram video ads completely to unlock the direct download link.
+                </p>
+            </div>
 
-      folders.forEach(folder => {
-        const card = document.createElement('div');
-        card.className = 'folder-card';
-        card.onclick = () => openModal(folder);
-        card.innerHTML = `
-          <div class="thumbnail-box">
-            <img src="${folder.thumb}" alt="${folder.name}" onerror="this.src='https://via.placeholder.com/150/1f2833/66fcf1?text=No+Image'">
-          </div>
-          <div class="folder-info">
-            <h3>${folder.name}</h3>
-          </div>
-        `;
-        grid.appendChild(card);
-      });
-    }
+            <!-- Ad Action Buttons -->
+            <div class="space-y-3 pt-2">
+                <!-- Watch Ad Button -->
+                <button id="btn-watch-ad" onclick="triggerAdsgramRewardAd()" class="cyber-button w-full py-3.5 rounded-xl font-bold text-white text-xs font-orbitron flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-play text-sm"></i>
+                    <span id="btn-watch-text">WATCH AD 1 OF 6</span>
+                </button>
 
-    function checkAdBlocker() {
-      const adblockBanner = document.getElementById('adblock-warning');
-      if (typeof window.Adsgram === 'undefined') {
-        adblockBanner.style.display = 'block';
-        return true;
-      } else {
-        adblockBanner.style.display = 'none';
-        return false;
-      }
-    }
+                <!-- Final Download Link (Strictly Locked until 6/6) -->
+                <a id="btn-download-file" href="#" target="_blank" class="hidden w-full py-3.5 rounded-xl font-bold text-white text-xs font-orbitron bg-gradient-to-r from-emerald-600 to-emerald-400 hover:from-emerald-500 hover:to-emerald-300 shadow-lg shadow-emerald-500/30 flex items-center justify-center space-x-2 text-center transition">
+                    <i class="fa-solid fa-cloud-arrow-down text-base"></i>
+                    <span>DOWNLOAD FILE NOW (UNLOCKED)</span>
+                </a>
+            </div>
 
-    function openModal(folder) {
-      if (checkAdBlocker()) {
-        alert("Please disable your AdBlocker to proceed.");
-        return;
-      }
-      currentFolder = folder;
-      currentAdCount = 0;
+        </div>
+    </div>
 
-      document.getElementById('modal-folder-title').innerText = folder.name;
-      updateProgress();
-      
-      document.getElementById('watch-ad-btn').style.display = 'block';
-      document.getElementById('download-btn').style.display = 'none';
-      document.getElementById('unlock-modal').style.display = 'flex';
-    }
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast-message" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 glass-panel-glow bg-cyber-black px-5 py-3 rounded-xl border border-cyber-red text-xs font-mono text-white flex items-center space-x-3 shadow-2xl">
+        <i class="fa-solid fa-circle-check text-cyber-red text-base"></i>
+        <span id="toast-text">Notification message</span>
+    </div>
 
-    function closeModal() {
-      document.getElementById('unlock-modal').style.display = 'none';
-      currentFolder = null;
-    }
+    <script>
+        // HARDCODED FILE FOLDERS LIST
+        const APP_FOLDERS = [
+            {
+                id: '1',
+                name: 'FREE PREMIUM SENSI',
+                tag: 'ALL DEVICE WORKING SENSI ',
+                size: '12MB',
+                thumb: 'https://i.ibb.co/xtDZ35mC/IMG-20261018-025848-380.jpg',
+                url: 'https://drive.google.com/drive/folders/1-gTsX9qisUIC1u3lT2Eum2XPrHUPeQzL'
+            },
+            {
+                id: 'f2',
+                name: 'Adobe Creative Master Suite 2026.rar',
+                tag: 'SOFTWARE',
+                size: '4.8 GB',
+                thumb: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop',
+                url: 'https://example.com/creative-suite.rar'
+            },
+            {
+                id: 'f3',
+                name: '4K Sci-Fi 3D Assets Pack.zip',
+                tag: '3D ASSETS',
+                size: '1.1 GB',
+                thumb: 'https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=500&auto=format&fit=crop',
+                url: 'https://example.com/3d-assets.zip'
+            }
+        ];
 
-    function updateProgress() {
-      const counterText = document.getElementById('counter-text');
-      const progressFill = document.getElementById('progress-fill');
-      
-      counterText.innerText = `${currentAdCount} / 6 ADS`;
-      const percentage = (currentAdCount / 6) * 100;
-      progressFill.style.width = `${percentage}%`;
-    }
+        // 6 DEDICATED ADSGRAM BLOCK IDS
+        const ADSGRAM_BLOCK_IDS = [
+            "int-57670",
+            "int-57671",
+            "int-57672",
+            "int-57673",
+            "57674",
+            "57618"
+        ];
 
-    function playAd() {
-      if (checkAdBlocker()) {
-        alert("AdBlocker detected. Turn off AdBlocker to gain credit!");
-        return;
-      }
+        // STATE FOR ACTIVE MODAL UNLOCK
+        let activeFolder = null;
+        let currentAdCount = 0;
+        const TARGET_ADS = 6;
 
-      const currentBlockId = adsgramBlocks[currentAdCount] || adsgramBlocks[0];
+        // INITIALIZE ON WINDOW LOAD
+        window.onload = function() {
+            // Initialize Telegram Mini App WebApp SDK
+            if (window.Telegram && window.Telegram.WebApp) {
+                window.Telegram.WebApp.ready();
+                window.Telegram.WebApp.expand();
+            }
 
-      if (window.Adsgram) {
-        const AdController = window.Adsgram.init({ blockId: currentBlockId });
-        
-        AdController.show().then((result) => {
-          currentAdCount++;
-          updateProgress();
+            renderFoldersGrid();
+            initMatrixRain();
+        };
 
-          if (currentAdCount >= 6) {
-            document.getElementById('watch-ad-btn').style.display = 'none';
-            document.getElementById('download-btn').style.display = 'block';
-          }
-        }).catch((result) => {
-          alert("Ad failed or was closed early. Please watch the full ad to proceed.");
-        });
-      } else {
-        alert("Adsgram SDK unavailable. Check network or AdBlock settings.");
-      }
-    }
+        // RENDER FOLDER CARDS GRID
+        function renderFoldersGrid() {
+            const grid = document.getElementById('folders-grid');
+            const badge = document.getElementById('folder-count-badge');
+            
+            badge.innerText = `${APP_FOLDERS.length} Folders`;
+            grid.innerHTML = '';
 
-    function triggerDownload() {
-      if (currentFolder && currentFolder.url) {
-        window.open(currentFolder.url, '_blank');
-      }
-    }
+            APP_FOLDERS.forEach(folder => {
+                const card = document.createElement('div');
+                card.className = 'glass-panel rounded-2xl p-4 flex flex-col justify-between space-y-3 hover:border-cyber-red/60 transition duration-300 group';
+                
+                card.innerHTML = `
+                    <div class="space-y-3">
+                        <div class="relative w-full h-36 rounded-xl overflow-hidden bg-black border border-cyber-red/30">
+                            <img src="${folder.thumb}" alt="${folder.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='https://placehold.co/600x400/12070a/ff003c?text=Folder+Thumb'">
+                            <span class="absolute top-2 left-2 px-2 py-0.5 rounded bg-black/80 text-cyber-red text-[9px] font-mono font-bold uppercase border border-cyber-red/40">
+                                ${folder.tag}
+                            </span>
+                            <span class="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-black/80 text-gray-300 text-[10px] font-mono">
+                                <i class="fa-solid fa-hard-drive text-cyber-red mr-1"></i>${folder.size}
+                            </span>
+                        </div>
 
-    window.onload = () => {
-      checkAdBlocker();
-      renderFolders();
-    };
-  </script>
+                        <div>
+                            <h3 class="font-orbitron text-xs md:text-sm font-bold text-white line-clamp-2">${folder.name}</h3>
+                            <p class="text-[10px] font-mono text-gray-400 mt-1">Requires 6 Adsgram Ad Views</p>
+                        </div>
+                    </div>
+
+                    <button onclick="openUnlockModal('${folder.id}')" class="cyber-button w-full py-2.5 rounded-xl text-xs font-bold text-white flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-lock text-xs"></i>
+                        <span>UNLOCK FOLDER (0/6 ADS)</span>
+                    </button>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // OPEN ADSGRAM UNLOCK MODAL
+        function openUnlockModal(folderId) {
+            activeFolder = APP_FOLDERS.find(f => f.id === folderId);
+            if (!activeFolder) return;
+
+            currentAdCount = 0;
+            document.getElementById('adblock-alert-box').classList.add('hidden');
+            
+            document.getElementById('modal-folder-name').innerText = activeFolder.name;
+            document.getElementById('modal-folder-size').innerText = `Est. Size: ${activeFolder.size}`;
+            document.getElementById('modal-folder-tag').innerText = activeFolder.tag;
+            document.getElementById('modal-folder-thumb').src = activeFolder.thumb;
+            
+            document.getElementById('btn-download-file').href = activeFolder.url;
+
+            updateAdProgressUI();
+            document.getElementById('unlock-modal').classList.remove('hidden');
+        }
+
+        function closeUnlockModal() {
+            document.getElementById('unlock-modal').classList.add('hidden');
+            activeFolder = null;
+        }
+
+        // UPDATE AD PROGRESS UI & BUTTON STATE
+        function updateAdProgressUI() {
+            const counterText = document.getElementById('ad-counter-text');
+            const progressBar = document.getElementById('ad-progress-bar');
+            const watchBtn = document.getElementById('btn-watch-ad');
+            const watchText = document.getElementById('btn-watch-text');
+            const downloadBtn = document.getElementById('btn-download-file');
+            const statusMsg = document.getElementById('ad-status-msg');
+
+            counterText.innerText = `${currentAdCount} / ${TARGET_ADS} ADS`;
+            const percentage = Math.floor((currentAdCount / TARGET_ADS) * 100);
+            progressBar.style.width = `${percentage}%`;
+
+            if (currentAdCount >= TARGET_ADS) {
+                watchBtn.classList.add('hidden');
+                downloadBtn.classList.remove('hidden');
+                statusMsg.innerHTML = '<span class="text-emerald-400 font-bold"><i class="fa-solid fa-circle-check mr-1"></i> 6/6 Ads Verified! Your file link is unlocked.</span>';
+            } else {
+                watchBtn.classList.remove('hidden');
+                downloadBtn.classList.add('hidden');
+                watchText.innerText = `WATCH AD ${currentAdCount + 1} OF 6`;
+                statusMsg.innerText = `You must watch 6 Adsgram video ads completely to unlock the direct download link.`;
+            }
+        }
+
+        // TRIGGER ADSGRAM REWARD AD SCRIPT WITH 6 DEDICATED BLOCK IDS
+        function triggerAdsgramRewardAd() {
+            const alertBox = document.getElementById('adblock-alert-box');
+            alertBox.classList.add('hidden');
+
+            // Pick specific Adsgram Block ID based on current step (0 to 5)
+            const currentBlockId = ADSGRAM_BLOCK_IDS[currentAdCount] || 'block-101';
+
+            // Check if Adsgram SDK is available
+            if (window.Adsgram) {
+                try {
+                    const AdController = window.Adsgram.init({
+                        blockId: currentBlockId,
+                        debug: false
+                    });
+
+                    AdController.show().then((result) => {
+                        // Ad completed successfully
+                        currentAdCount++;
+                        updateAdProgressUI();
+                        showToast(`Ad ${currentAdCount}/6 verified!`);
+                    }).catch((error) => {
+                        // Ad failed or blocked by AdBlock
+                        console.error("Adsgram error or AdBlock detected:", error);
+                        alertBox.classList.remove('hidden');
+                        showToast("Ad blocked or failed to load. Disable AdBlock!");
+                    });
+                } catch(e) {
+                    console.error("Adsgram init error:", e);
+                    alertBox.classList.remove('hidden');
+                }
+            } else {
+                // If Adsgram SDK fail to load due to AdBlock
+                alertBox.classList.remove('hidden');
+                showToast("Adsgram SDK blocked by browser extension!");
+            }
+        }
+
+        // RED MATRIX BACKGROUND ANIMATION
+        function initMatrixRain() {
+            const canvas = document.getElementById('matrix-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            const chars = '0123456789ABCDEFｦｱｳｴｵｶｷｹｺｻｼｽｾｿﾀﾂﾃﾅﾆﾇﾈﾊﾋﾎﾏﾐﾑﾒﾓﾔﾕﾗﾘﾜ';
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = new Array(columns).fill(1);
+
+            function drawMatrix() {
+                ctx.fillStyle = 'rgba(7, 3, 4, 0.08)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = '#ff003c';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const char = chars.charAt(Math.floor(Math.random() * chars.length));
+                    const x = i * fontSize;
+                    const y = drops[i] * fontSize;
+
+                    ctx.fillText(char, x, y);
+
+                    if (y > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(drawMatrix, 33);
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast-message');
+            document.getElementById('toast-text').innerText = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+    </script>
 </body>
 </html>
