@@ -15,6 +15,44 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
 
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase Configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyAo2syMed9Aka-1dFO5rsc5xSpncUF3gn0",
+          authDomain: "freesensi-272a9.firebaseapp.com",
+          projectId: "freesensi-272a9",
+          storageBucket: "freesensi-272a9.firebasestorage.app",
+          messagingSenderId: "860968212642",
+          appId: "1:860968212642:web:3638e8924f5f8923325ffb"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Expose Firebase DB & Auth globally
+        window.firebaseDb = db;
+        window.firebaseAuth = auth;
+        window.firebaseModules = {
+            collection,
+            doc,
+            getDoc,
+            setDoc,
+            addDoc,
+            updateDoc,
+            deleteDoc,
+            onSnapshot,
+            increment,
+            serverTimestamp
+        };
+    </script>
+
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Orbitron:wght@500;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
@@ -247,11 +285,208 @@
                     <span id="btn-watch-text">WATCH AD 1 OF 6</span>
                 </button>
 
-                <!-- Final Download Link (Strictly Locked until 6/6) -->
-                <a id="btn-download-file" href="#" target="_blank" class="hidden w-full py-3.5 rounded-xl font-bold text-white text-xs font-orbitron bg-gradient-to-r from-emerald-600 to-emerald-400 hover:from-emerald-500 hover:to-emerald-300 shadow-lg shadow-emerald-500/30 flex items-center justify-center space-x-2 text-center transition">
+                <!-- Final Download Link (Tracks Download in Firebase on Click) -->
+                <a id="btn-download-file" onclick="handleFileDownloadClick(event)" href="#" target="_blank" class="hidden w-full py-3.5 rounded-xl font-bold text-white text-xs font-orbitron bg-gradient-to-r from-emerald-600 to-emerald-400 hover:from-emerald-500 hover:to-emerald-300 shadow-lg shadow-emerald-500/30 flex items-center justify-center space-x-2 text-center transition">
                     <i class="fa-solid fa-cloud-arrow-down text-base"></i>
                     <span>DOWNLOAD FILE NOW (UNLOCKED)</span>
                 </a>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ADMIN LOGIN AUTH MODAL -->
+    <div id="admin-auth-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="glass-panel-glow bg-cyber-black rounded-2xl w-full max-w-sm border border-cyber-red/60 p-6 space-y-4 relative">
+            <button onclick="closeAdminAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-cyber-red text-xl">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="text-center space-y-1">
+                <div class="w-12 h-12 rounded-full bg-cyber-red/20 border border-cyber-red flex items-center justify-center mx-auto text-cyber-red text-xl">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+                <h3 class="font-orbitron font-bold text-white text-lg">HIGH PROTECTION ADMIN</h3>
+                <p class="text-xs font-mono text-gray-400">Enter secure password to access control panel</p>
+            </div>
+            <form onsubmit="handleAdminLogin(event)" class="space-y-4">
+                <div>
+                    <label class="text-[10px] font-mono text-gray-300 uppercase">Admin Password</label>
+                    <input type="password" id="admin-password-input" required placeholder="••••••••" class="cyber-input w-full px-3 py-2.5 rounded-xl text-xs font-mono mt-1">
+                </div>
+                <button type="submit" class="cyber-button w-full py-3 rounded-xl font-bold text-white text-xs font-orbitron">
+                    AUTHENTICATE & ENTER
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ADMIN CONTROL PANEL MODAL -->
+    <div id="admin-panel-modal" class="fixed inset-0 z-50 bg-black/95 backdrop-blur-lg hidden flex flex-col p-4 overflow-y-auto">
+        <div class="max-w-5xl mx-auto w-full glass-panel-glow bg-cyber-black rounded-2xl border border-cyber-red/60 p-6 space-y-6 my-auto">
+            
+            <!-- Admin Header -->
+            <div class="flex items-center justify-between border-b border-cyber-red/30 pb-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-cyber-red flex items-center justify-center text-white text-xl">
+                        <i class="fa-solid fa-sliders"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-orbitron font-bold text-white text-lg">ADMIN CONTROL DASHBOARD</h2>
+                        <p class="text-xs font-mono text-gray-400">Manage Folders, Adsgram Blocks & View Accurate Download Analytics</p>
+                    </div>
+                </div>
+                <button onclick="closeAdminPanel()" class="px-4 py-2 rounded-xl bg-cyber-red/20 border border-cyber-red text-cyber-red text-xs font-mono font-bold hover:bg-cyber-red hover:text-white transition">
+                    <i class="fa-solid fa-right-from-bracket mr-1"></i> EXIT ADMIN
+                </button>
+            </div>
+
+            <!-- ANALYTICS CARDS -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="glass-panel p-4 rounded-xl border border-cyber-red/40 flex items-center justify-between">
+                    <div>
+                        <p class="text-[10px] font-mono text-gray-400 uppercase">Accurate File Downloads</p>
+                        <h4 id="stat-total-downloads" class="text-2xl font-orbitron font-bold text-cyber-emerald mt-1">0</h4>
+                        <p class="text-[9px] font-mono text-gray-400">Downloaded after 6 ads</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-download"></i>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-4 rounded-xl border border-cyber-red/40 flex items-center justify-between">
+                    <div>
+                        <p class="text-[10px] font-mono text-gray-400 uppercase">Total Adsgram Ads Watched</p>
+                        <h4 id="stat-total-ads" class="text-2xl font-orbitron font-bold text-cyber-red mt-1">0</h4>
+                        <p class="text-[9px] font-mono text-gray-400">6 ads per successful download</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-lg bg-cyber-red/20 border border-cyber-red/40 text-cyber-red flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-eye"></i>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-4 rounded-xl border border-cyber-red/40 flex items-center justify-between">
+                    <div>
+                        <p class="text-[10px] font-mono text-gray-400 uppercase">Active Folders</p>
+                        <h4 id="stat-total-folders" class="text-2xl font-orbitron font-bold text-white mt-1">0</h4>
+                        <p class="text-[9px] font-mono text-gray-400">Loaded in database</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-lg bg-blue-500/20 border border-blue-500/40 text-blue-400 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-folder-open"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADMIN TABS & CONTROLS -->
+            <div class="space-y-4">
+                
+                <!-- Section 1: Manage File Folders -->
+                <div class="glass-panel p-5 rounded-xl border border-cyber-red/30 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-orbitron text-sm font-bold text-white flex items-center">
+                            <i class="fa-solid fa-plus-circle text-cyber-red mr-2"></i> Add / Modify File Folder
+                        </h3>
+                    </div>
+
+                    <form onsubmit="handleSaveFolder(event)" class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono">
+                        <input type="hidden" id="form-folder-id">
+                        <div>
+                            <label class="text-gray-300">File Folder Title</label>
+                            <input type="text" id="form-folder-name" required placeholder="e.g. GTA 5 Mod Pack.zip" class="cyber-input w-full px-3 py-2 rounded-lg mt-1">
+                        </div>
+                        <div>
+                            <label class="text-gray-300">Category Tag</label>
+                            <input type="text" id="form-folder-tag" required placeholder="GAME MODS / SOFTWARE" class="cyber-input w-full px-3 py-2 rounded-lg mt-1">
+                        </div>
+                        <div>
+                            <label class="text-gray-300">File Size</label>
+                            <input type="text" id="form-folder-size" required placeholder="e.g. 1.8 GB" class="cyber-input w-full px-3 py-2 rounded-lg mt-1">
+                        </div>
+                        <div>
+                            <label class="text-gray-300">Direct File Download URL</label>
+                            <input type="url" id="form-folder-url" required placeholder="https://example.com/file.zip" class="cyber-input w-full px-3 py-2 rounded-lg mt-1">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="text-gray-300">Thumbnail Image URL</label>
+                            <input type="url" id="form-folder-thumb" required placeholder="https://images.unsplash.com/photo-..." class="cyber-input w-full px-3 py-2 rounded-lg mt-1">
+                        </div>
+                        <div class="sm:col-span-2 flex space-x-2 pt-2">
+                            <button type="submit" class="cyber-button px-6 py-2.5 rounded-lg text-white font-bold font-orbitron text-xs">
+                                <i class="fa-solid fa-floppy-disk mr-1"></i> SAVE FOLDER TO FIREBASE
+                            </button>
+                            <button type="button" onclick="resetFolderForm()" class="px-4 py-2.5 rounded-lg bg-gray-800 text-gray-300 hover:bg-gray-700 font-bold text-xs">
+                                RESET FORM
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Section 2: Adsgram 6-Block IDs & Admin Security Options -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    
+                    <!-- Adsgram Block IDs Settings -->
+                    <div class="glass-panel p-4 rounded-xl border border-cyber-red/30 space-y-3">
+                        <h3 class="font-orbitron text-xs font-bold text-white flex items-center">
+                            <i class="fa-solid fa-rectangle-ad text-cyber-red mr-2"></i> Customize Adsgram 6 Block IDs
+                        </h3>
+                        <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+                            <div>
+                                <label class="text-[10px] text-gray-400">Ad 1 Block ID</label>
+                                <input type="text" id="ad-block-0" class="cyber-input w-full px-2 py-1.5 rounded mt-0.5">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-gray-400">Ad 2 Block ID</label>
+                                <input type="text" id="ad-block-1" class="cyber-input w-full px-2 py-1.5 rounded mt-0.5">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-gray-400">Ad 3 Block ID</label>
+                                <input type="text" id="ad-block-2" class="cyber-input w-full px-2 py-1.5 rounded mt-0.5">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-gray-400">Ad 4 Block ID</label>
+                                <input type="text" id="ad-block-3" class="cyber-input w-full px-2 py-1.5 rounded mt-0.5">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-gray-400">Ad 5 Block ID</label>
+                                <input type="text" id="ad-block-4" class="cyber-input w-full px-2 py-1.5 rounded mt-0.5">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-gray-400">Ad 6 Block ID</label>
+                                <input type="text" id="ad-block-5" class="cyber-input w-full px-2 py-1.5 rounded mt-0.5">
+                            </div>
+                        </div>
+                        <button onclick="saveAdsgramConfig()" class="cyber-button w-full py-2 rounded-lg text-white font-bold text-xs font-orbitron mt-2">
+                            UPDATE ADSGRAM BLOCK CONFIG
+                        </button>
+                    </div>
+
+                    <!-- Security Passcode Customization -->
+                    <div class="glass-panel p-4 rounded-xl border border-cyber-red/30 space-y-3">
+                        <h3 class="font-orbitron text-xs font-bold text-white flex items-center">
+                            <i class="fa-solid fa-key text-cyber-red mr-2"></i> Security: Customize Admin Password
+                        </h3>
+                        <form onsubmit="handleAdminPasswordChange(event)" class="space-y-3 text-xs font-mono">
+                            <div>
+                                <label class="text-gray-300">New Admin Password</label>
+                                <input type="password" id="new-admin-password" required placeholder="Enter new secret password" class="cyber-input w-full px-3 py-2 rounded-lg mt-1">
+                            </div>
+                            <button type="submit" class="cyber-button w-full py-2 rounded-lg text-white font-bold text-xs font-orbitron">
+                                UPDATE SECURITY PASSWORD
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Section 3: Live Real-time Download Event Logs -->
+                <div class="glass-panel p-4 rounded-xl border border-cyber-red/30 space-y-3">
+                    <h3 class="font-orbitron text-xs font-bold text-white flex items-center justify-between">
+                        <span><i class="fa-solid fa-list-check text-cyber-red mr-2"></i> Real-Time Completed Download Logs</span>
+                        <span class="text-[10px] font-mono text-gray-400">Recorded after 6 Ads Watch Completion</span>
+                    </h3>
+                    <div class="max-h-48 overflow-y-auto space-y-2 font-mono text-xs" id="download-logs-container">
+                        <div class="text-gray-500 text-center py-4">No download logs recorded yet.</div>
+                    </div>
+                </div>
+
             </div>
 
         </div>
@@ -264,15 +499,16 @@
     </div>
 
     <script>
-        // HARDCODED FILE FOLDERS LIST
-        const APP_FOLDERS = [
+        // HARDCODED DEFAULT FILE FOLDERS LIST (FALLBACK IF FIREBASE IS EMPTY/OFFLINE)
+        let APP_FOLDERS = [
             {
-                id: '1',
-                name: 'FREE PREMIUM SENSI',
-                tag: 'ALL DEVICE WORKING SENSI ',
-                size: '12MB',
-                thumb: 'https://i.ibb.co/xtDZ35mC/IMG-20261018-025848-380.jpg',
-                url: 'https://drive.google.com/drive/folders/1-gTsX9qisUIC1u3lT2Eum2XPrHUPeQzL'
+                id: 'f1',
+                name: 'Cyberpunk 2077 Mod Pack v2.0.zip',
+                tag: 'GAME MODS',
+                size: '2.4 GB',
+                thumb: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=500&auto=format&fit=crop',
+                url: 'https://example.com/cyberpunk-modpack.zip',
+                downloads: 0
             },
             {
                 id: 'f2',
@@ -280,7 +516,8 @@
                 tag: 'SOFTWARE',
                 size: '4.8 GB',
                 thumb: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop',
-                url: 'https://example.com/creative-suite.rar'
+                url: 'https://example.com/creative-suite.rar',
+                downloads: 0
             },
             {
                 id: 'f3',
@@ -288,28 +525,27 @@
                 tag: '3D ASSETS',
                 size: '1.1 GB',
                 thumb: 'https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=500&auto=format&fit=crop',
-                url: 'https://example.com/3d-assets.zip'
+                url: 'https://example.com/3d-assets.zip',
+                downloads: 0
             }
         ];
 
-        // 6 DEDICATED ADSGRAM BLOCK IDS
-        const ADSGRAM_BLOCK_IDS = [
-            "int-57670",
-            "int-57671",
-            "int-57672",
-            "int-57673",
-            "57674",
-            "57618"
+        // ADSGRAM BLOCK CONFIGURATION
+        let ADSGRAM_BLOCK_IDS = JSON.parse(localStorage.getItem('ADSGRAM_BLOCK_IDS')) || [
+            "int-57670", "int-57671", "int-57672", "int-57673", "57674", "57618"
         ];
+
+        // ADMIN PASSWORD (STORED IN LOCALSTORAGE WITH FALLBACK DEFAULT 'admin128')
+        let ADMIN_PASSWORD = localStorage.getItem('CYBERVAULT_ADMIN_PASS') || 'admin128';
 
         // STATE FOR ACTIVE MODAL UNLOCK
         let activeFolder = null;
         let currentAdCount = 0;
         const TARGET_ADS = 6;
+        let totalGlobalDownloads = 0;
 
         // INITIALIZE ON WINDOW LOAD
         window.onload = function() {
-            // Initialize Telegram Mini App WebApp SDK
             if (window.Telegram && window.Telegram.WebApp) {
                 window.Telegram.WebApp.ready();
                 window.Telegram.WebApp.expand();
@@ -317,7 +553,70 @@
 
             renderFoldersGrid();
             initMatrixRain();
+            initFirebaseListeners();
+            loadAdsgramBlockInputs();
         };
+
+        // FIREBASE SNAPSHOT LISTENERS FOR REALTIME DATA & ANALYTICS
+        function initFirebaseListeners() {
+            const checkFirebaseReady = setInterval(() => {
+                if (window.firebaseDb && window.firebaseAuth && window.firebaseModules) {
+                    clearInterval(checkFirebaseReady);
+                    
+                    const db = window.firebaseDb;
+                    const { collection, doc, onSnapshot } = window.firebaseModules;
+                    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+                    // 1. Listen for Dynamic Folders
+                    const foldersRef = collection(db, 'artifacts', appId, 'public', 'data', 'folders');
+                    onSnapshot(foldersRef, (snapshot) => {
+                        if (!snapshot.empty) {
+                            const dynamicFolders = [];
+                            snapshot.forEach((doc) => {
+                                dynamicFolders.push({ id: doc.id, ...doc.data() });
+                            });
+                            APP_FOLDERS = dynamicFolders;
+                            renderFoldersGrid();
+                            updateAdminAnalytics();
+                        }
+                    }, (err) => console.warn("Folders snapshot error:", err));
+
+                    // 2. Listen for Analytics Stats (Accurate Downloads)
+                    const statsDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'analytics', 'global');
+                    onSnapshot(statsDocRef, (snap) => {
+                        if (snap.exists()) {
+                            const data = snap.data();
+                            totalGlobalDownloads = data.totalDownloads || 0;
+                            updateAdminAnalytics();
+                        }
+                    }, (err) => console.warn("Analytics snapshot error:", err));
+
+                    // 3. Listen for Live Download Logs
+                    const logsRef = collection(db, 'artifacts', appId, 'public', 'data', 'download_logs');
+                    onSnapshot(logsRef, (snapshot) => {
+                        const logsContainer = document.getElementById('download-logs-container');
+                        if (snapshot.empty) {
+                            logsContainer.innerHTML = '<div class="text-gray-500 text-center py-4">No download logs recorded yet.</div>';
+                            return;
+                        }
+                        let html = '';
+                        snapshot.forEach((doc) => {
+                            const log = doc.data();
+                            html += `
+                                <div class="p-2 rounded bg-cyber-darkred/30 border border-cyber-red/20 flex items-center justify-between">
+                                    <div class="truncate pr-2">
+                                        <span class="text-emerald-400 font-bold">[VERIFIED 6 ADS]</span> 
+                                        <span class="text-white">${log.folderName || 'File'}</span>
+                                    </div>
+                                    <span class="text-[10px] text-gray-400 font-mono">${log.timestamp ? new Date(log.timestamp.toDate()).toLocaleTimeString() : 'Just now'}</span>
+                                </div>
+                            `;
+                        });
+                        logsContainer.innerHTML = html;
+                    }, (err) => console.warn("Logs snapshot error:", err));
+                }
+            }, 300);
+        }
 
         // RENDER FOLDER CARDS GRID
         function renderFoldersGrid() {
@@ -345,7 +644,10 @@
 
                         <div>
                             <h3 class="font-orbitron text-xs md:text-sm font-bold text-white line-clamp-2">${folder.name}</h3>
-                            <p class="text-[10px] font-mono text-gray-400 mt-1">Requires 6 Adsgram Ad Views</p>
+                            <div class="flex items-center justify-between text-[10px] font-mono text-gray-400 mt-1">
+                                <span>Requires 6 Adsgram Ads</span>
+                                <span class="text-emerald-400"><i class="fa-solid fa-download text-[9px] mr-0.5"></i>${folder.downloads || 0}</span>
+                            </div>
                         </div>
                     </div>
 
@@ -356,6 +658,176 @@
                 `;
                 grid.appendChild(card);
             });
+        }
+
+        // HANDLE FILE DOWNLOAD CLICK (INCREMENT ACCURATE DOWNLOAD & ADS COUNTER IN FIREBASE)
+        async function handleFileDownloadClick(event) {
+            if (currentAdCount < TARGET_ADS) {
+                event.preventDefault();
+                showToast("You must complete 6/6 Ads to download!");
+                return;
+            }
+
+            // Increment local and database accurate analytics
+            totalGlobalDownloads++;
+            updateAdminAnalytics();
+
+            if (window.firebaseDb && window.firebaseModules) {
+                try {
+                    const db = window.firebaseDb;
+                    const { doc, setDoc, addDoc, collection, increment, serverTimestamp } = window.firebaseModules;
+                    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+                    // 1. Update Global Downloads & Ads Watched Counter
+                    const statsDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'analytics', 'global');
+                    await setDoc(statsDocRef, {
+                        totalDownloads: increment(1),
+                        totalAdsWatched: increment(6)
+                    }, { merge: true });
+
+                    // 2. Update Per-Folder Download Count
+                    if (activeFolder && activeFolder.id) {
+                        const folderDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'folders', activeFolder.id);
+                        await setDoc(folderDocRef, {
+                            downloads: increment(1)
+                        }, { merge: true });
+                    }
+
+                    // 3. Log Recent Download Event
+                    const logsRef = collection(db, 'artifacts', appId, 'public', 'data', 'download_logs');
+                    await addDoc(logsRef, {
+                        folderId: activeFolder ? activeFolder.id : 'unknown',
+                        folderName: activeFolder ? activeFolder.name : 'Unknown File',
+                        adsCompleted: 6,
+                        timestamp: serverTimestamp()
+                    });
+                } catch(e) {
+                    console.warn("Analytics write warning:", e);
+                }
+            }
+
+            showToast("Accurate Download Verified & Download Started!");
+        }
+
+        // ADMIN PANEL AUTHENTICATION
+        function openAdminAuthModal() {
+            document.getElementById('admin-auth-modal').classList.remove('hidden');
+        }
+
+        function closeAdminAuthModal() {
+            document.getElementById('admin-auth-modal').classList.add('hidden');
+            document.getElementById('admin-password-input').value = '';
+        }
+
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const inputPass = document.getElementById('admin-password-input').value;
+            if (inputPass === ADMIN_PASSWORD) {
+                closeAdminAuthModal();
+                openAdminPanel();
+                showToast("Admin Authenticated Successfully!");
+            } else {
+                showToast("Invalid Admin Password!");
+            }
+        }
+
+        function openAdminPanel() {
+            updateAdminAnalytics();
+            document.getElementById('admin-panel-modal').classList.remove('hidden');
+        }
+
+        function closeAdminPanel() {
+            document.getElementById('admin-panel-modal').classList.add('hidden');
+        }
+
+        function updateAdminAnalytics() {
+            document.getElementById('stat-total-downloads').innerText = totalGlobalDownloads;
+            document.getElementById('stat-total-ads').innerText = totalGlobalDownloads * 6;
+            document.getElementById('stat-total-folders').innerText = APP_FOLDERS.length;
+        }
+
+        // SAVE NEW / EDIT FOLDER TO FIREBASE
+        async function handleSaveFolder(e) {
+            e.preventDefault();
+            const id = document.getElementById('form-folder-id').value || `folder_${Date.now()}`;
+            const folderData = {
+                id: id,
+                name: document.getElementById('form-folder-name').value,
+                tag: document.getElementById('form-folder-tag').value.toUpperCase(),
+                size: document.getElementById('form-folder-size').value,
+                url: document.getElementById('form-folder-url').value,
+                thumb: document.getElementById('form-folder-thumb').value,
+                downloads: 0
+            };
+
+            if (window.firebaseDb && window.firebaseModules) {
+                try {
+                    const db = window.firebaseDb;
+                    const { doc, setDoc } = window.firebaseModules;
+                    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+                    
+                    const folderRef = doc(db, 'artifacts', appId, 'public', 'data', 'folders', id);
+                    await setDoc(folderRef, folderData, { merge: true });
+                    showToast("Folder Saved to Firebase!");
+                } catch(e) {
+                    console.error("Firebase save error:", e);
+                    saveFolderLocally(folderData);
+                }
+            } else {
+                saveFolderLocally(folderData);
+            }
+
+            resetFolderForm();
+        }
+
+        function saveFolderLocally(folderData) {
+            const index = APP_FOLDERS.findIndex(f => f.id === folderData.id);
+            if (index >= 0) {
+                APP_FOLDERS[index] = folderData;
+            } else {
+                APP_FOLDERS.push(folderData);
+            }
+            renderFoldersGrid();
+            updateAdminAnalytics();
+            showToast("Folder Saved Locally!");
+        }
+
+        function resetFolderForm() {
+            document.getElementById('form-folder-id').value = '';
+            document.getElementById('form-folder-name').value = '';
+            document.getElementById('form-folder-tag').value = '';
+            document.getElementById('form-folder-size').value = '';
+            document.getElementById('form-folder-url').value = '';
+            document.getElementById('form-folder-thumb').value = '';
+        }
+
+        // ADSGRAM CONFIG MANAGMENT
+        function loadAdsgramBlockInputs() {
+            for(let i=0; i<6; i++) {
+                const el = document.getElementById(`ad-block-${i}`);
+                if (el) el.value = ADSGRAM_BLOCK_IDS[i] || `block-10${i+1}`;
+            }
+        }
+
+        function saveAdsgramConfig() {
+            for(let i=0; i<6; i++) {
+                const val = document.getElementById(`ad-block-${i}`).value.trim();
+                if (val) ADSGRAM_BLOCK_IDS[i] = val;
+            }
+            localStorage.setItem('ADSGRAM_BLOCK_IDS', JSON.stringify(ADSGRAM_BLOCK_IDS));
+            showToast("Adsgram Block IDs updated!");
+        }
+
+        // UPDATE ADMIN PASSWORD
+        function handleAdminPasswordChange(e) {
+            e.preventDefault();
+            const newPass = document.getElementById('new-admin-password').value;
+            if (newPass) {
+                ADMIN_PASSWORD = newPass;
+                localStorage.setItem('CYBERVAULT_ADMIN_PASS', newPass);
+                document.getElementById('new-admin-password').value = '';
+                showToast("Admin Password Updated Successfully!");
+            }
         }
 
         // OPEN ADSGRAM UNLOCK MODAL
@@ -412,10 +884,8 @@
             const alertBox = document.getElementById('adblock-alert-box');
             alertBox.classList.add('hidden');
 
-            // Pick specific Adsgram Block ID based on current step (0 to 5)
             const currentBlockId = ADSGRAM_BLOCK_IDS[currentAdCount] || 'block-101';
 
-            // Check if Adsgram SDK is available
             if (window.Adsgram) {
                 try {
                     const AdController = window.Adsgram.init({
@@ -424,12 +894,10 @@
                     });
 
                     AdController.show().then((result) => {
-                        // Ad completed successfully
                         currentAdCount++;
                         updateAdProgressUI();
                         showToast(`Ad ${currentAdCount}/6 verified!`);
                     }).catch((error) => {
-                        // Ad failed or blocked by AdBlock
                         console.error("Adsgram error or AdBlock detected:", error);
                         alertBox.classList.remove('hidden');
                         showToast("Ad blocked or failed to load. Disable AdBlock!");
@@ -439,7 +907,6 @@
                     alertBox.classList.remove('hidden');
                 }
             } else {
-                // If Adsgram SDK fail to load due to AdBlock
                 alertBox.classList.remove('hidden');
                 showToast("Adsgram SDK blocked by browser extension!");
             }
